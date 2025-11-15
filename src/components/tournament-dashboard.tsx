@@ -136,54 +136,6 @@ export default function TournamentDashboard() {
 
     setSchedule(newSchedule);
   };
-
-  const handleRandomizeField = (roundIndex: number, matchIndex: number) => {
-    if (!schedule || numFields <= 0) return;
-  
-    const newSchedule = JSON.parse(JSON.stringify(schedule));
-    const round = newSchedule.schedule[roundIndex];
-    const currentMatch = round.matches[matchIndex];
-  
-    const allFields = Array.from({ length: numFields }, (_, i) => i + 1);
-    
-    // Get fields used by other matches in the same round
-    const usedFields = round.matches
-        .filter((match: any, index: number) => index !== matchIndex && !match.bye && match.field > 0)
-        .map((match: any) => match.field);
-  
-    // Available fields are all fields minus used fields
-    const availableFields = allFields.filter(field => !usedFields.includes(field));
-  
-    if (availableFields.length === 0 && numFields > 0) {
-        toast({
-            title: "Todos os campos sorteados",
-            description: "Todos os campos já foram usados nesta rodada. Libere um campo para sortear novamente.",
-        });
-        return;
-    }
-    
-    // From available fields, find one that is different from the current one
-    let fieldsToChooseFrom = availableFields.filter(field => field !== currentMatch.field);
-    
-    // If all available fields are the same as the current one, just use the available pool
-    if (fieldsToChooseFrom.length === 0) {
-        fieldsToChooseFrom = availableFields;
-    }
-
-    if (fieldsToChooseFrom.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Erro de Sorteio",
-        description: "Não foi possível sortear um novo campo.",
-      });
-      return;
-    }
-
-    const newField = fieldsToChooseFrom[Math.floor(Math.random() * fieldsToChooseFrom.length)];
-    
-    currentMatch.field = newField;
-    setSchedule(newSchedule);
-  };
   
   const handlePlayoffScoreChange = (matchId: string, player: 'player1' | 'player2', score: number | null) => {
       if (!playoffs) return;
@@ -329,7 +281,7 @@ export default function TournamentDashboard() {
                 <CardTitle className="flex items-center gap-2 text-2xl"><Calendar/> Tabela de Jogos</CardTitle>
               </CardHeader>
               <CardContent>
-                <ScheduleDisplay schedule={schedule} onScoreChange={handleScoreChange} onRandomizeField={handleRandomizeField} />
+                <ScheduleDisplay schedule={schedule} onScoreChange={handleScoreChange} />
               </CardContent>
             </Card>
           )}
