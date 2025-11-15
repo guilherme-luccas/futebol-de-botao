@@ -125,14 +125,31 @@ export default function TournamentDashboard() {
     if (!schedule || numFields <= 1) return;
 
     const newSchedule = JSON.parse(JSON.stringify(schedule));
-    const match = newSchedule.schedule[roundIndex].matches[matchIndex];
+    const round = newSchedule.schedule[roundIndex];
+    const currentMatch = round.matches[matchIndex];
+
+    const allFields = Array.from({ length: numFields }, (_, i) => i + 1);
+    const usedFields = round.matches
+        .filter((match, index) => index !== matchIndex && !match.bye)
+        .map(match => match.field);
+
+    const availableFields = allFields.filter(field => !usedFields.includes(field));
+
+    if (availableFields.length === 0) {
+        toast({
+            variant: "destructive",
+            title: "Nenhum campo disponível",
+            description: "Todos os campos já estão em uso para esta rodada.",
+        });
+        return;
+    }
     
     let newField;
     do {
-      newField = Math.floor(Math.random() * numFields) + 1;
-    } while (newField === match.field);
+      newField = availableFields[Math.floor(Math.random() * availableFields.length)];
+    } while (availableFields.length > 1 && newField === currentMatch.field);
 
-    match.field = newField;
+    currentMatch.field = newField;
     setSchedule(newSchedule);
   };
   
