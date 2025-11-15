@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: 'Button Football Tournament',
-  description: 'Manage your own button football tournament with AI-powered scheduling.',
+  description: 'Manage your own button football tournament.',
 };
 
 export default function RootLayout({

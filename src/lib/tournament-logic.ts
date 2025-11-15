@@ -1,4 +1,4 @@
-import type { Schedule, Ranking, Playoff, PlayoffMatch } from './types';
+import type { Schedule, Ranking, Playoff, PlayoffMatch, Match, Round } from './types';
 
 export function calculateRankings(playerNames: string[], schedule: Schedule): Ranking[] {
   const stats: { [key: string]: Omit<Ranking, 'rank' | 'name'> } = {};
@@ -117,4 +117,100 @@ export function generatePlayoffs(top4Rankings: Ranking[]): Playoff | null {
     };
     
     return { semiFinals, final };
+}
+
+
+export function generateRoundRobinSchedule(playerNames: string[], numFields: number): Schedule {
+    let players = [...playerNames];
+    let byePlayer: string | null = null;
+    
+    if (players.length % 2 !== 0) {
+        byePlayer = "BYE";
+        players.push(byePlayer);
+    }
+
+    const numPlayers = players.length;
+    const numRounds = numPlayers - 1;
+    const matchesPerRound = numPlayers / 2;
+    const rounds: Round[] = [];
+
+    for (let i = 0; i < numRounds; i++) {
+        const roundMatches: Omit<Match, 'player1Score' | 'player2Score'>[] = [];
+        
+        for (let j = 0; j < matchesPerRound; j++) {
+            const player1 = players[j];
+            const player2 = players[numPlayers - 1 - j];
+
+            if (player1 !== byePlayer && player2 !== byePlayer) {
+                roundMatches.push({
+                    field: (roundMatches.length % numFields) + 1,
+                    player1: player1,
+                    player2: player2,
+                    bye: false,
+                });
+            }
+        }
+        
+        // Handle bye
+        if (byePlayer) {
+            const playerWithBye = players.find(p => ![...roundMatches.map(m => m.player1), ...roundMatches.map(m => m.player2)].includes(p));
+            if(playerWithBye && playerWithBye !== byePlayer) {
+                 roundMatches.push({
+                    field: (roundMatches.length % numFields) + 1,
+                    player1: playerWithBye,
+                    player2: 'BYE',
+                    bye: true
+                });
+            }
+        }
+        
+        const unassignedMatches = roundMatches.filter(m => !m.field);
+        let fieldCounter = 1;
+        unassignedMatches.forEach(match => {
+            match.field = fieldCounter;
+            fieldCounter = (fieldCounter % numFields) + 1;
+        });
+
+
+        rounds.push({
+            round: i + 1,
+            matches: roundMatches.map(m => ({ ...m, player1Score: null, player2Score: null }))
+        });
+
+        // Rotate players for the next round
+        const lastPlayer = players.pop();
+        if (lastPlayer) {
+            players.splice(1, 0, lastPlayer);
+        }
+    }
+    
+    // Distribute matches across fields
+    const finalRounds: Round[] = [];
+    for(const round of rounds) {
+      const newMatches: Match[] = [];
+      const matchesWithPlayers = round.matches.filter(m => !m.bye);
+      
+      for(let i = 0; i < matchesWithPlayers.length; i++) {
+        newMatches.push({
+          ...matchesWithPlayers[i],
+          field: (i % numFields) + 1,
+        });
+      }
+
+      const byeMatch = round.matches.find(m => m.bye);
+      if(byeMatch) {
+        newMatches.push({
+          ...byeMatch,
+          field: 0, // No field for a bye
+        });
+      }
+
+      finalRounds.push({
+        ...round,
+        matches: newMatches.sort((a,b) => a.field - b.field)
+      });
+    }
+
+
+    return { schedule: finalRounds };
 }

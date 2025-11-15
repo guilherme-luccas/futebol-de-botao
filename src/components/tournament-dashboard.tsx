@@ -1,12 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  generateMatchSchedule,
-  type GenerateMatchScheduleOutput,
-} from "@/ai/flows/generate-match-schedule";
 import type { Ranking, Schedule, Player, Playoff } from "@/lib/types";
-import { calculateRankings, generatePlayoffs, areAllMatchesPlayed } from "@/lib/tournament-logic";
+import { calculateRankings, generatePlayoffs, areAllMatchesPlayed, generateRoundRobinSchedule } from "@/lib/tournament-logic";
 import PlayerManager from "@/components/player-manager";
 import ScheduleDisplay from "@/components/schedule-display";
 import RankingsTable from "@/components/rankings-table";
@@ -14,7 +10,7 @@ import PlayoffBracket from "@/components/playoff-bracket";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Trophy, Users, Shield, Calendar, Bot, Loader2 } from "lucide-react";
+import { Trophy, Users, Shield, Calendar, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -81,10 +77,10 @@ export default function TournamentDashboard() {
 
     setIsLoading(true);
     try {
-      const result: GenerateMatchScheduleOutput = await generateMatchSchedule({
-        playerNames: players.map((p) => p.name),
-        numFields: numFields,
-      });
+      const result = generateRoundRobinSchedule(
+        players.map((p) => p.name),
+        numFields,
+      );
 
       const initialSchedule: Schedule = {
         schedule: result.schedule.map((round) => ({
@@ -236,9 +232,9 @@ export default function TournamentDashboard() {
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
-                <Bot className="mr-2 h-4 w-4" />
+                <Calendar className="mr-2 h-4 w-4" />
               )}
-              Generate Schedule with AI
+              Generate Schedule
             </Button>
           </CardContent>
         </Card>
