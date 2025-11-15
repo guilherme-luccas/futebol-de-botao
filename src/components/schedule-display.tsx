@@ -3,13 +3,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Dices } from "lucide-react";
 
 interface ScheduleDisplayProps {
   schedule: Schedule;
   onScoreChange: (roundIndex: number, matchIndex: number, player: 'player1' | 'player2', score: number | null) => void;
+  onRandomizeField: (roundIndex: number, matchIndex: number) => void;
 }
 
-export default function ScheduleDisplay({ schedule, onScoreChange }: ScheduleDisplayProps) {
+export default function ScheduleDisplay({ schedule, onScoreChange, onRandomizeField }: ScheduleDisplayProps) {
   return (
     <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
       {schedule.schedule.map((round, roundIndex) => (
@@ -20,6 +23,7 @@ export default function ScheduleDisplay({ schedule, onScoreChange }: ScheduleDis
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-[80px]"></TableHead>
                     <TableHead className="w-[80px]">Campo</TableHead>
                     <TableHead>Jogador 1</TableHead>
                     <TableHead className="w-[120px] text-center">Placar</TableHead>
@@ -29,7 +33,14 @@ export default function ScheduleDisplay({ schedule, onScoreChange }: ScheduleDis
                 <TableBody>
                   {round.matches.map((match, matchIndex) => (
                     <TableRow key={`${match.player1}-${match.player2}-${matchIndex}`}>
-                      <TableCell className="font-medium">{match.field}</TableCell>
+                      <TableCell>
+                        {!match.bye && (
+                           <Button variant="ghost" size="icon" onClick={() => onRandomizeField(roundIndex, matchIndex)}>
+                            <Dices className="h-5 w-5" />
+                           </Button>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium">{match.bye ? '-' : match.field}</TableCell>
                       <TableCell>{match.player1}</TableCell>
                       <TableCell className="text-center">
                         {match.bye ? (

@@ -120,6 +120,21 @@ export default function TournamentDashboard() {
 
     setSchedule(newSchedule);
   };
+
+  const handleRandomizeField = (roundIndex: number, matchIndex: number) => {
+    if (!schedule || numFields <= 1) return;
+
+    const newSchedule = JSON.parse(JSON.stringify(schedule));
+    const match = newSchedule.schedule[roundIndex].matches[matchIndex];
+    
+    let newField;
+    do {
+      newField = Math.floor(Math.random() * numFields) + 1;
+    } while (newField === match.field);
+
+    match.field = newField;
+    setSchedule(newSchedule);
+  };
   
   const handlePlayoffScoreChange = (matchId: string, player: 'player1' | 'player2', score: number | null) => {
       if (!playoffs) return;
@@ -246,7 +261,7 @@ export default function TournamentDashboard() {
                 <CardTitle className="flex items-center gap-2 text-2xl"><Calendar/> Tabela de Jogos</CardTitle>
               </CardHeader>
               <CardContent>
-                <ScheduleDisplay schedule={schedule} onScoreChange={handleScoreChange} />
+                <ScheduleDisplay schedule={schedule} onScoreChange={handleScoreChange} onRandomizeField={handleRandomizeField} />
               </CardContent>
             </Card>
           )}
