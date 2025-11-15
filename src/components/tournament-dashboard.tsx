@@ -37,6 +37,7 @@ const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
   const GameTimer = () => {
     const [isTiming, setIsTiming] = useState(false);
+    const [timeLeft, setTimeLeft] = useState(10);
     const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
 
     useEffect(() => {
@@ -66,15 +67,21 @@ const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 
     useEffect(() => {
-        let timer: NodeJS.Timeout;
-        if (isTiming) {
-            timer = setTimeout(() => {
-                playAlarm();
-                setIsTiming(false);
-            }, 10000);
+        if (!isTiming) return;
+
+        if (timeLeft === 0) {
+            playAlarm();
+            setIsTiming(false);
+            setTimeLeft(10);
+            return;
         }
-        return () => clearTimeout(timer);
-    }, [isTiming, playAlarm]);
+
+        const timerId = setTimeout(() => {
+            setTimeLeft(timeLeft - 1);
+        }, 1000);
+
+        return () => clearTimeout(timerId);
+    }, [isTiming, timeLeft, playAlarm]);
 
 
     const handleTimerClick = () => {
@@ -87,9 +94,14 @@ const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
     };
     
     return (
-        <Button onClick={handleTimerClick} disabled={isTiming} variant="outline" size="icon">
+        <Button onClick={handleTimerClick} disabled={isTiming} variant="outline" size="icon" className="relative">
            <Timer className={`h-5 w-5 ${isTiming ? 'animate-pulse text-destructive' : ''}`} />
-           <span className="sr-only">Iniciar Cronômetro</span>
+           <span className="sr-only">Iniciar Cronômetro de 10 segundos</span>
+           {isTiming && (
+             <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs font-bold text-destructive-foreground">
+                {timeLeft}
+             </span>
+           )}
         </Button>
     );
 };
@@ -197,21 +209,11 @@ export default function TournamentDashboard() {
     const availableFields = allFields.filter(field => !usedFields.includes(field));
   
     if (availableFields.length === 0) {
-        // If all fields are used, allow re-using a field, but not the current one if it's set
-        const fieldsToChooseFrom = allFields.filter(field => field !== currentMatch.field);
-         if (fieldsToChooseFrom.length > 0) {
-            currentMatch.field = fieldsToChooseFrom[Math.floor(Math.random() * fieldsToChooseFrom.length)];
-        } else if (allFields.length > 0) {
-            currentMatch.field = allFields[0]; // Fallback to first field if only one exists
-        } else {
-             toast({
-                variant: "destructive",
-                title: "Nenhum campo disponível",
-                description: "Não há campos configurados para sortear.",
-            });
-            return;
-        }
-        setSchedule(newSchedule);
+        toast({
+            variant: "destructive",
+            title: "Nenhum campo novo disponível",
+            description: "Todos os campos já foram sorteados nesta rodada.",
+        });
         return;
     }
     
@@ -221,7 +223,7 @@ export default function TournamentDashboard() {
     if (fieldsToChooseFrom.length > 0) {
       newField = fieldsToChooseFrom[Math.floor(Math.random() * fieldsToChooseFrom.length)];
     } else if (availableFields.length > 0) {
-      newField = availableFields[0]; // If the only available field is the current one
+      newField = availableFields[0];
     } else {
       toast({
             variant: "destructive",
@@ -242,7 +244,6 @@ export default function TournamentDashboard() {
   
       let matchFound = false;
       
-      // Check semi-finals
       for (const match of newPlayoffs.semiFinals) {
         if (match.id === matchId) {
           match[player === 'player1' ? 'player1Score' : 'player2Score'] = score;
@@ -251,12 +252,10 @@ export default function TournamentDashboard() {
         }
       }
   
-      // Check final
       if (!matchFound && newPlayoffs.final.id === matchId) {
         newPlayoffs.final[player === 'player1' ? 'player1Score' : 'player2Score'] = score;
       }
       
-      // Update winners
       for (const match of newPlayoffs.semiFinals) {
           if (match.player1Score !== null && match.player2Score !== null) {
               if (match.player1Score > match.player2Score) {
@@ -271,7 +270,6 @@ export default function TournamentDashboard() {
           }
       }
 
-      // Populate Final
       const semi1WinnerName = newPlayoffs.semiFinals[0].winner;
       const semi2WinnerName = newPlayoffs.semiFinals[1].winner;
       const semi1 = newPlayoffs.semiFinals[0];
