@@ -40,7 +40,10 @@ export default function PlayerManager({ players, setPlayers }: PlayerManagerProp
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="new-player">Nomes dos Jogadores</Label>
+        <div className="flex items-center gap-2">
+            <Label htmlFor="new-player">Nomes dos Jogadores</Label>
+            <Badge variant="secondary">{players.length}</Badge>
+        </div>
         <div className="flex gap-2">
           <Input
             id="new-player"
