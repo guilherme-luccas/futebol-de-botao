@@ -37,11 +37,10 @@ const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
   const GameTimer = () => {
     const [isTiming, setIsTiming] = useState(false);
-    const [timeLeft, setTimeLeft] = useState(10);
     const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
 
     useEffect(() => {
-        // Initialize AudioContext on the client side
+        // Initialize AudioContext on the client side to avoid SSR issues.
         setAudioContext(new window.AudioContext());
         return () => {
             audioContext?.close();
@@ -50,42 +49,50 @@ const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
     const playAlarm = useCallback(() => {
         if (!audioContext) return;
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
+        
+        const playBeep = (freq: number, startTime: number, duration: number) => {
+          const oscillator = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          
+          oscillator.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+          
+          oscillator.type = 'square'; 
+          oscillator.frequency.setValueAtTime(freq, startTime);
+          gainNode.gain.setValueAtTime(1, startTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+          
+          oscillator.start(startTime);
+          oscillator.stop(startTime + duration);
+        };
 
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
+        const now = audioContext.currentTime;
+        const beepDuration = 0.1;
+        const interval = 0.15;
+        
+        // Schedule a sequence of beeps
+        playBeep(988, now, beepDuration); // B5
+        playBeep(988, now + interval, beepDuration); // B5
+        playBeep(988, now + 2 * interval, beepDuration); // B5
 
-        oscillator.type = 'sine';
-        oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
-        gainNode.gain.setValueAtTime(1, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.5);
-
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.5);
     }, [audioContext]);
 
 
     useEffect(() => {
         if (!isTiming) return;
 
-        if (timeLeft === 0) {
+        const timerId = setTimeout(() => {
             playAlarm();
             setIsTiming(false);
-            setTimeLeft(10);
-            return;
-        }
-
-        const timerId = setTimeout(() => {
-            setTimeLeft(timeLeft - 1);
-        }, 1000);
+        }, 10000); // 10 seconds
 
         return () => clearTimeout(timerId);
-    }, [isTiming, timeLeft, playAlarm]);
+    }, [isTiming, playAlarm]);
 
 
     const handleTimerClick = () => {
         if (!isTiming && audioContext) {
+            // User interaction is required to start audio context
             if (audioContext.state === 'suspended') {
                 audioContext.resume();
             }
@@ -97,11 +104,6 @@ const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
         <Button onClick={handleTimerClick} disabled={isTiming} variant="outline" size="icon" className="relative">
            <Timer className={`h-5 w-5 ${isTiming ? 'animate-pulse text-destructive' : ''}`} />
            <span className="sr-only">Iniciar Cronômetro de 10 segundos</span>
-           {isTiming && (
-             <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-xs font-bold text-destructive-foreground">
-                {timeLeft}
-             </span>
-           )}
         </Button>
     );
 };
@@ -202,36 +204,40 @@ export default function TournamentDashboard() {
   
     const allFields = Array.from({ length: numFields }, (_, i) => i + 1);
     
+    // Get fields used by other matches in the same round
     const usedFields = round.matches
         .filter((match: any, index: number) => index !== matchIndex && !match.bye && match.field > 0)
         .map((match: any) => match.field);
   
+    // Available fields are all fields minus used fields
     const availableFields = allFields.filter(field => !usedFields.includes(field));
   
-    if (availableFields.length === 0) {
+    if (availableFields.length === 0 && numFields > 0) {
         toast({
-            variant: "destructive",
-            title: "Nenhum campo novo disponível",
-            description: "Todos os campos já foram sorteados nesta rodada.",
+            title: "Todos os campos sorteados",
+            description: "Todos os campos já foram usados nesta rodada. Libere um campo para sortear novamente.",
         });
         return;
     }
     
-    const fieldsToChooseFrom = availableFields.filter(field => field !== currentMatch.field);
+    // From available fields, find one that is different from the current one
+    let fieldsToChooseFrom = availableFields.filter(field => field !== currentMatch.field);
     
-    let newField;
-    if (fieldsToChooseFrom.length > 0) {
-      newField = fieldsToChooseFrom[Math.floor(Math.random() * fieldsToChooseFrom.length)];
-    } else if (availableFields.length > 0) {
-      newField = availableFields[0];
-    } else {
+    // If all available fields are the same as the current one, just use the available pool
+    if (fieldsToChooseFrom.length === 0) {
+        fieldsToChooseFrom = availableFields;
+    }
+
+    if (fieldsToChooseFrom.length === 0) {
       toast({
-            variant: "destructive",
-            title: "Erro de Sorteio",
-            description: "Não foi possível sortear um novo campo.",
+        variant: "destructive",
+        title: "Erro de Sorteio",
+        description: "Não foi possível sortear um novo campo.",
       });
       return;
     }
+
+    const newField = fieldsToChooseFrom[Math.floor(Math.random() * fieldsToChooseFrom.length)];
     
     currentMatch.field = newField;
     setSchedule(newSchedule);
