@@ -1,3 +1,9 @@
+import TournamentDashboard from '@/components/tournament-dashboard';
+
 export default function Home() {
-  return <></>;
+  return (
+    <main>
+      <TournamentDashboard />
+    </main>
+  );
 }
