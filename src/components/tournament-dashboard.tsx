@@ -10,7 +10,7 @@ import PlayoffBracket from "@/components/playoff-bracket";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Trophy, Users, Shield, Calendar, Loader2 } from "lucide-react";
+import { Trophy, Users, Shield, Calendar, Loader2, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -79,7 +79,6 @@ export default function TournamentDashboard() {
     try {
       const result = generateRoundRobinSchedule(
         players.map((p) => p.name),
-        numFields,
       );
 
       const initialSchedule: Schedule = {
@@ -89,6 +88,7 @@ export default function TournamentDashboard() {
             ...match,
             player1Score: null,
             player2Score: null,
+            field: 0,
           })),
         })),
       };
@@ -122,21 +122,18 @@ export default function TournamentDashboard() {
   };
 
   const handleRandomizeField = (roundIndex: number, matchIndex: number) => {
-    if (!schedule || numFields <= 1) return;
+    if (!schedule || numFields <= 0) return;
 
     const newSchedule = JSON.parse(JSON.stringify(schedule));
     const round = newSchedule.schedule[roundIndex];
     const currentMatch = round.matches[matchIndex];
 
-    // Todos os campos possíveis
     const allFields = Array.from({ length: numFields }, (_, i) => i + 1);
     
-    // Campos já usados por outras partidas nesta rodada
     const usedFields = round.matches
         .filter((match, index) => index !== matchIndex && !match.bye && match.field > 0)
         .map(match => match.field);
 
-    // Campos disponíveis para sorteio
     const availableFields = allFields.filter(field => !usedFields.includes(field));
 
     if (availableFields.length === 0) {
@@ -148,15 +145,12 @@ export default function TournamentDashboard() {
         return;
     }
     
-    // Filtra o campo atual da lista de disponíveis para garantir que, se possível, um novo campo seja escolhido
     const fieldsToChooseFrom = availableFields.filter(field => field !== currentMatch.field);
     
     let newField;
     if (fieldsToChooseFrom.length > 0) {
-      // Sorteia um novo campo da lista de disponíveis (excluindo o atual)
       newField = fieldsToChooseFrom[Math.floor(Math.random() * fieldsToChooseFrom.length)];
     } else {
-      // Se o único campo disponível é o atual, mantém ele (não há outra opção)
       newField = availableFields[0];
     }
     
@@ -245,7 +239,7 @@ export default function TournamentDashboard() {
     setRankings([]);
     setPlayoffs(null);
     setView('setup');
-  }
+  };
 
   return (
     <div className="container mx-auto p-4 md:p-8">
@@ -275,14 +269,22 @@ export default function TournamentDashboard() {
               <label htmlFor="numFields" className="flex items-center gap-2 font-medium">
                 <Shield /> Número de Campos
               </label>
-              <Input
-                id="numFields"
-                type="number"
-                value={numFields}
-                onChange={(e) => setNumFields(Math.max(1, parseInt(e.target.value) || 1))}
-                min="1"
-                className="w-24"
-              />
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="icon" onClick={() => setNumFields(Math.max(1, numFields - 1))}>
+                    <Minus className="h-4 w-4" />
+                </Button>
+                <Input
+                  id="numFields"
+                  type="number"
+                  value={numFields}
+                  onChange={(e) => setNumFields(Math.max(1, parseInt(e.target.value) || 1))}
+                  min="1"
+                  className="w-16 text-center"
+                />
+                <Button variant="outline" size="icon" onClick={() => setNumFields(numFields + 1)}>
+                    <Plus className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
             <Button size="lg" onClick={handleGenerateSchedule} disabled={isLoading} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
               {isLoading ? (
@@ -323,7 +325,7 @@ export default function TournamentDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl"><Trophy/> Mata-mata</CardTitle>
                 <CardDescription>Os 4 melhores jogadores avançam para o mata-mata!</CardDescription>
-              </CardHeader>
+              </Header>
               <CardContent>
                 <PlayoffBracket playoffs={playoffs} onScoreChange={handlePlayoffScoreChange} />
               </CardContent>
