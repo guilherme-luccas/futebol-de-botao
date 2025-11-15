@@ -40,14 +40,12 @@ const GameTimer = () => {
     const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
 
     useEffect(() => {
-        // Initialize AudioContext on the client side to avoid SSR issues.
-        // This check is to prevent errors during server-side rendering.
         if (typeof window !== 'undefined') {
             setAudioContext(new window.AudioContext());
         }
         return () => {
             audioContext?.close();
-        }
+        };
     }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     const playAlarm = useCallback(() => {
