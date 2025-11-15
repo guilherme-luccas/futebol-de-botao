@@ -125,7 +125,7 @@ export function generateRoundRobinSchedule(playerNames: string[], numFields: num
     let byePlayer: string | null = null;
     
     if (players.length % 2 !== 0) {
-        byePlayer = "BYE";
+        byePlayer = "FOLGA";
         players.push(byePlayer);
     }
 
@@ -158,7 +158,7 @@ export function generateRoundRobinSchedule(playerNames: string[], numFields: num
                  roundMatches.push({
                     field: (roundMatches.length % numFields) + 1,
                     player1: playerWithBye,
-                    player2: 'BYE',
+                    player2: 'FOLGA',
                     bye: true
                 });
             }

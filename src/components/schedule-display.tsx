@@ -14,16 +14,16 @@ export default function ScheduleDisplay({ schedule, onScoreChange }: ScheduleDis
     <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
       {schedule.schedule.map((round, roundIndex) => (
         <AccordionItem key={round.round} value={`item-${roundIndex}`}>
-          <AccordionTrigger className="text-xl font-headline">Round {round.round}</AccordionTrigger>
+          <AccordionTrigger className="text-xl font-headline">Rodada {round.round}</AccordionTrigger>
           <AccordionContent>
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[80px]">Field</TableHead>
-                    <TableHead>Player 1</TableHead>
-                    <TableHead className="w-[120px] text-center">Score</TableHead>
-                    <TableHead>Player 2</TableHead>
+                    <TableHead className="w-[80px]">Campo</TableHead>
+                    <TableHead>Jogador 1</TableHead>
+                    <TableHead className="w-[120px] text-center">Placar</TableHead>
+                    <TableHead>Jogador 2</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -33,7 +33,7 @@ export default function ScheduleDisplay({ schedule, onScoreChange }: ScheduleDis
                       <TableCell>{match.player1}</TableCell>
                       <TableCell className="text-center">
                         {match.bye ? (
-                          <Badge variant="outline">BYE</Badge>
+                          <Badge variant="outline">FOLGA</Badge>
                         ) : (
                           <div className="flex items-center justify-center gap-2">
                             <Input
@@ -42,7 +42,7 @@ export default function ScheduleDisplay({ schedule, onScoreChange }: ScheduleDis
                               value={match.player1Score ?? ''}
                               onChange={(e) => onScoreChange(roundIndex, matchIndex, 'player1', e.target.value === '' ? null : parseInt(e.target.value))}
                               className="w-14 text-center"
-                              aria-label={`${match.player1} score`}
+                              aria-label={`${match.player1} placar`}
                             />
                             <span>-</span>
                             <Input
@@ -51,7 +51,7 @@ export default function ScheduleDisplay({ schedule, onScoreChange }: ScheduleDis
                               value={match.player2Score ?? ''}
                               onChange={(e) => onScoreChange(roundIndex, matchIndex, 'player2', e.target.value === '' ? null : parseInt(e.target.value))}
                               className="w-14 text-center"
-                              aria-label={`${match.player2} score`}
+                              aria-label={`${match.player2} placar`}
                             />
                           </div>
                         )}

@@ -18,15 +18,15 @@ export default function RankingsTable({ rankings }: RankingsTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[50px]">Rank</TableHead>
-            <TableHead>Player</TableHead>
-            <TableHead className="text-center">P</TableHead>
-            <TableHead className="text-center">W</TableHead>
+            <TableHead className="w-[50px]">Pos</TableHead>
+            <TableHead>Jogador</TableHead>
+            <TableHead className="text-center">J</TableHead>
+            <TableHead className="text-center">V</TableHead>
+            <TableHead className="text-center">E</TableHead>
             <TableHead className="text-center">D</TableHead>
-            <TableHead className="text-center">L</TableHead>
-            <TableHead className="text-center">GF</TableHead>
-            <TableHead className="text-center">GA</TableHead>
-            <TableHead className="text-center">GD</TableHead>
+            <TableHead className="text-center">GP</TableHead>
+            <TableHead className="text-center">GC</TableHead>
+            <TableHead className="text-center">SG</TableHead>
             <TableHead className="text-center">Pts</TableHead>
           </TableRow>
         </TableHeader>

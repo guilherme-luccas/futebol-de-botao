@@ -26,8 +26,8 @@ export default function PlayerManager({ players, setPlayers }: PlayerManagerProp
     } else {
         toast({
             variant: "destructive",
-            title: "Invalid Name",
-            description: "Player name cannot be empty or a duplicate.",
+            title: "Nome Inválido",
+            description: "O nome do jogador não pode estar vazio ou ser duplicado.",
         });
     }
   };
@@ -39,16 +39,16 @@ export default function PlayerManager({ players, setPlayers }: PlayerManagerProp
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="new-player">Player Names</Label>
+        <Label htmlFor="new-player">Nomes dos Jogadores</Label>
         <div className="flex gap-2">
           <Input
             id="new-player"
             value={newPlayerName}
             onChange={(e) => setNewPlayerName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAddPlayer()}
-            placeholder="e.g., John Doe"
+            placeholder="Ex: João Silva"
           />
-          <Button onClick={handleAddPlayer}><Plus className="mr-2 h-4 w-4"/> Add Player</Button>
+          <Button onClick={handleAddPlayer}><Plus className="mr-2 h-4 w-4"/> Adicionar Jogador</Button>
         </div>
       </div>
       <div className="flex flex-wrap gap-2 min-h-[40px]">

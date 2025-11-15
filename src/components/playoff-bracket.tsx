@@ -15,30 +15,30 @@ const MatchCard = ({ match, onScoreChange, disabled = false }: { match: PlayoffM
     </CardHeader>
     <CardContent className="p-4 pt-0 space-y-2">
       <div className="flex justify-between items-center">
-        <span className="flex-1 truncate">{match.player1 ? `${match.player1.name} (${match.player1.seed})` : 'TBD'}</span>
+        <span className="flex-1 truncate">{match.player1 ? `${match.player1.name} (${match.player1.seed})` : 'A definir'}</span>
         <Input
           type="number"
           min="0"
           value={match.player1Score ?? ''}
           onChange={(e) => onScoreChange(match.id, 'player1', e.target.value === '' ? null : parseInt(e.target.value))}
           className="w-14 text-center"
-          aria-label={`${match.player1?.name || 'Player 1'} score`}
+          aria-label={`${match.player1?.name || 'Jogador 1'} placar`}
           disabled={!match.player1 || disabled}
         />
       </div>
       <div className="flex justify-between items-center">
-        <span className="flex-1 truncate">{match.player2 ? `${match.player2.name} (${match.player2.seed})` : 'TBD'}</span>
+        <span className="flex-1 truncate">{match.player2 ? `${match.player2.name} (${match.player2.seed})` : 'A definir'}</span>
         <Input
           type="number"
           min="0"
           value={match.player2Score ?? ''}
           onChange={(e) => onScoreChange(match.id, 'player2', e.target.value === '' ? null : parseInt(e.target.value))}
           className="w-14 text-center"
-          aria-label={`${match.player2?.name || 'Player 2'} score`}
+          aria-label={`${match.player2?.name || 'Jogador 2'} placar`}
           disabled={!match.player2 || disabled}
         />
       </div>
-      {match.winner && <div className="pt-2 text-center text-accent font-bold">Winner: {match.winner}</div>}
+      {match.winner && <div className="pt-2 text-center text-accent font-bold">Vencedor: {match.winner}</div>}
     </CardContent>
   </Card>
 );
@@ -62,7 +62,7 @@ export default function PlayoffBracket({ playoffs, onScoreChange }: PlayoffBrack
       {final.winner && (
         <div className="flex flex-col items-center gap-2 mt-8 md:mt-0 md:ml-16">
             <Trophy className="w-16 h-16 text-yellow-400"/>
-            <p className="text-xl font-bold">Champion</p>
+            <p className="text-xl font-bold">Campeão</p>
             <p className="text-2xl font-headline text-primary">{final.winner}</p>
         </div>
       )}

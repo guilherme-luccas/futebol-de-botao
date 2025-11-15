@@ -61,16 +61,16 @@ export default function TournamentDashboard() {
     if (players.length < 3) {
       toast({
         variant: "destructive",
-        title: "Not enough players",
-        description: "Please add at least 3 players to generate a schedule.",
+        title: "Jogadores insuficientes",
+        description: "Adicione pelo menos 3 jogadores para gerar uma tabela.",
       });
       return;
     }
     if (numFields < 1) {
       toast({
         variant: "destructive",
-        title: "Invalid number of fields",
-        description: "You must have at least 1 field.",
+        title: "Número de campos inválido",
+        description: "Você deve ter pelo menos 1 campo.",
       });
       return;
     }
@@ -95,11 +95,11 @@ export default function TournamentDashboard() {
       setSchedule(initialSchedule);
       setView('tournament');
     } catch (error) {
-      console.error("Failed to generate schedule:", error);
+      console.error("Falha ao gerar a tabela:", error);
       toast({
         variant: "destructive",
-        title: "Schedule Generation Failed",
-        description: "Could not generate a schedule. Please try again.",
+        title: "Falha na Geração da Tabela",
+        description: "Não foi possível gerar uma tabela. Tente novamente.",
       });
     } finally {
       setIsLoading(false);
@@ -197,11 +197,11 @@ export default function TournamentDashboard() {
         <div className="flex items-center gap-3">
           <FootballIcon className="h-10 w-10 text-primary" />
           <h1 className="text-3xl md:text-4xl font-bold font-headline">
-            Button Football Tournament
+            Torneio de Futebol de Botão
           </h1>
         </div>
         {view === 'tournament' && (
-          <Button onClick={startNewTournament}>New Tournament</Button>
+          <Button onClick={startNewTournament}>Novo Torneio</Button>
         )}
       </header>
       
@@ -209,15 +209,15 @@ export default function TournamentDashboard() {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-2xl">
-              <Users /> Tournament Setup
+              <Users /> Configuração do Torneio
             </CardTitle>
-            <CardDescription>Add players and specify the number of fields to begin.</CardDescription>
+            <CardDescription>Adicione jogadores e especifique o número de campos para começar.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <PlayerManager players={players} setPlayers={setPlayers} />
             <div className="space-y-2">
               <label htmlFor="numFields" className="flex items-center gap-2 font-medium">
-                <Shield /> Number of Fields
+                <Shield /> Número de Campos
               </label>
               <Input
                 id="numFields"
@@ -234,7 +234,7 @@ export default function TournamentDashboard() {
               ) : (
                 <Calendar className="mr-2 h-4 w-4" />
               )}
-              Generate Schedule
+              Gerar Tabela de Jogos
             </Button>
           </CardContent>
         </Card>
@@ -243,7 +243,7 @@ export default function TournamentDashboard() {
           {schedule && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl"><Calendar/> Match Schedule</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-2xl"><Calendar/> Tabela de Jogos</CardTitle>
               </CardHeader>
               <CardContent>
                 <ScheduleDisplay schedule={schedule} onScoreChange={handleScoreChange} />
@@ -254,7 +254,7 @@ export default function TournamentDashboard() {
           {rankings.length > 0 && (
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl"><Trophy/> Rankings</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-2xl"><Trophy/> Classificação</CardTitle>
               </CardHeader>
               <CardContent>
                 <RankingsTable rankings={rankings} />
@@ -265,8 +265,8 @@ export default function TournamentDashboard() {
           {playoffs && (
              <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-2xl"><Trophy/> Playoffs</CardTitle>
-                <CardDescription>The top 4 players advance to the playoffs!</CardDescription>
+                <CardTitle className="flex items-center gap-2 text-2xl"><Trophy/> Mata-mata</CardTitle>
+                <CardDescription>Os 4 melhores jogadores avançam para o mata-mata!</CardDescription>
               </CardHeader>
               <CardContent>
                 <PlayoffBracket playoffs={playoffs} onScoreChange={handlePlayoffScoreChange} />
