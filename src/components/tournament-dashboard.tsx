@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { Ranking, Schedule, Player, Playoff } from "@/lib/types";
 import { calculateRankings, generatePlayoffs, areAllMatchesPlayed, generateRoundRobinSchedule } from "@/lib/tournament-logic";
 import PlayerManager from "@/components/player-manager";
@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Trophy, Users, Shield, Calendar, Loader2, Minus, Plus } from "lucide-react";
+import { Trophy, Users, Shield, Calendar, Loader2, Minus, Plus, Timer } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -34,6 +34,65 @@ const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
       <path d="M2 12a5 5 0 0 0 5 5 5 5 0 0 0 5-5 5 5 0 0 0-5-5 5 5 0 0 0-5 5z" />
     </svg>
   );
+
+  const GameTimer = () => {
+    const [isTiming, setIsTiming] = useState(false);
+    const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+
+    useEffect(() => {
+        // Initialize AudioContext on the client side
+        setAudioContext(new window.AudioContext());
+        return () => {
+            audioContext?.close();
+        }
+    }, []);
+
+    const playAlarm = useCallback(() => {
+        if (!audioContext) return;
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
+        gainNode.gain.setValueAtTime(1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.5);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5);
+    }, [audioContext]);
+
+
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (isTiming) {
+            timer = setTimeout(() => {
+                playAlarm();
+                setIsTiming(false);
+            }, 10000);
+        }
+        return () => clearTimeout(timer);
+    }, [isTiming, playAlarm]);
+
+
+    const handleTimerClick = () => {
+        if (!isTiming && audioContext) {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            setIsTiming(true);
+        }
+    };
+    
+    return (
+        <Button onClick={handleTimerClick} disabled={isTiming} variant="outline" size="icon">
+           <Timer className={`h-5 w-5 ${isTiming ? 'animate-pulse text-destructive' : ''}`} />
+           <span className="sr-only">Iniciar Cronômetro</span>
+        </Button>
+    );
+};
 
 export default function TournamentDashboard() {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -138,11 +197,21 @@ export default function TournamentDashboard() {
     const availableFields = allFields.filter(field => !usedFields.includes(field));
   
     if (availableFields.length === 0) {
-        toast({
-            variant: "destructive",
-            title: "Nenhum campo disponível",
-            description: "Todos os campos já estão em uso para esta rodada.",
-        });
+        // If all fields are used, allow re-using a field, but not the current one if it's set
+        const fieldsToChooseFrom = allFields.filter(field => field !== currentMatch.field);
+         if (fieldsToChooseFrom.length > 0) {
+            currentMatch.field = fieldsToChooseFrom[Math.floor(Math.random() * fieldsToChooseFrom.length)];
+        } else if (allFields.length > 0) {
+            currentMatch.field = allFields[0]; // Fallback to first field if only one exists
+        } else {
+             toast({
+                variant: "destructive",
+                title: "Nenhum campo disponível",
+                description: "Não há campos configurados para sortear.",
+            });
+            return;
+        }
+        setSchedule(newSchedule);
         return;
     }
     
@@ -152,9 +221,8 @@ export default function TournamentDashboard() {
     if (fieldsToChooseFrom.length > 0) {
       newField = fieldsToChooseFrom[Math.floor(Math.random() * fieldsToChooseFrom.length)];
     } else if (availableFields.length > 0) {
-      newField = availableFields[0];
+      newField = availableFields[0]; // If the only available field is the current one
     } else {
-      // This case should ideally not be reached if there's at least one field
       toast({
             variant: "destructive",
             title: "Erro de Sorteio",
@@ -259,9 +327,12 @@ export default function TournamentDashboard() {
             Torneio de Futebol de Botão
           </h1>
         </div>
-        {view === 'tournament' && (
-          <Button onClick={startNewTournament}>Novo Torneio</Button>
-        )}
+        <div className="flex items-center gap-4">
+            {view === 'tournament' && <GameTimer />}
+            {view === 'tournament' && (
+              <Button onClick={startNewTournament}>Novo Torneio</Button>
+            )}
+        </div>
       </header>
       
       {view === 'setup' ? (
