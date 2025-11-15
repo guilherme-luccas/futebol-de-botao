@@ -33,9 +33,9 @@ const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
       <path d="M22 12a5 5 0 0 0-5-5 5 5 0 0 0-5 5 5 5 0 0 0 5 5 5 5 0 0 0 5-5z" />
       <path d="M2 12a5 5 0 0 0 5 5 5 5 0 0 0 5-5 5 5 0 0 0-5-5 5 5 0 0 0-5 5z" />
     </svg>
-  );
+);
 
-  const GameTimer = () => {
+const GameTimer = () => {
     const [isTiming, setIsTiming] = useState(false);
     const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
 
@@ -69,11 +69,12 @@ const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
         const now = audioContext.currentTime;
         const beepDuration = 0.1;
         const interval = 0.15;
-        
-        // Schedule a sequence of beeps
-        playBeep(988, now, beepDuration); // B5
-        playBeep(988, now + interval, beepDuration); // B5
-        playBeep(988, now + 2 * interval, beepDuration); // B5
+        const totalDuration = 7; // seconds
+        const beepCount = Math.floor(totalDuration / interval);
+
+        for (let i = 0; i < beepCount; i++) {
+            playBeep(988, now + i * interval, beepDuration); // B5
+        }
 
     }, [audioContext]);
 
@@ -152,7 +153,8 @@ export default function TournamentDashboard() {
     setIsLoading(true);
     try {
       const result = generateRoundRobinSchedule(
-        players.map((p) => p.name)
+        players.map((p) => p.name),
+        numFields,
       );
 
       const initialSchedule: Schedule = {
@@ -409,7 +411,7 @@ export default function TournamentDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl"><Trophy/> Mata-mata</CardTitle>
                 <CardDescription>Os 4 melhores jogadores avançam para o mata-mata!</CardDescription>
-              </CardHeader>
+              </Header>
               <CardContent>
                 <PlayoffBracket playoffs={playoffs} onScoreChange={handlePlayoffScoreChange} />
               </CardContent>
