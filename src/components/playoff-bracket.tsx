@@ -21,7 +21,7 @@ const MatchCard = ({ match, onScoreChange, disabled = false }: { match: PlayoffM
           min="0"
           value={match.player1Score ?? ''}
           onChange={(e) => onScoreChange(match.id, 'player1', e.target.value === '' ? null : parseInt(e.target.value))}
-          className="w-14 text-center"
+          className="w-16 h-12 text-center text-2xl font-bold"
           aria-label={`${match.player1?.name || 'Jogador 1'} placar`}
           disabled={!match.player1 || disabled}
         />
@@ -33,7 +33,7 @@ const MatchCard = ({ match, onScoreChange, disabled = false }: { match: PlayoffM
           min="0"
           value={match.player2Score ?? ''}
           onChange={(e) => onScoreChange(match.id, 'player2', e.target.value === '' ? null : parseInt(e.target.value))}
-          className="w-14 text-center"
+          className="w-16 h-12 text-center text-2xl font-bold"
           aria-label={`${match.player2?.name || 'Jogador 2'} placar`}
           disabled={!match.player2 || disabled}
         />

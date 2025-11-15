@@ -47,21 +47,21 @@ export default function RankingsTable({ rankings }: RankingsTableProps) {
         <TableBody>
           {rankings.map((p) => (
             <TableRow key={p.name} className={p.rank <= 4 ? 'bg-primary/10' : ''}>
-              <TableCell className="font-medium">
+              <TableCell className="font-medium text-lg">
                 <div className="flex items-center gap-2">
                   {p.rank <= 3 ? <Medal className={`h-5 w-5 ${getRankColor(p.rank)}`} /> : null}
                   <span>{p.rank}</span>
                 </div>
               </TableCell>
               <TableCell className="font-medium">{p.name}</TableCell>
-              <TableCell className="text-center">{p.played}</TableCell>
-              <TableCell className="text-center">{p.wins}</TableCell>
-              <TableCell className="text-center">{p.draws}</TableCell>
-              <TableCell className="text-center">{p.losses}</TableCell>
-              <TableCell className="text-center">{p.goalsFor}</TableCell>
-              <TableCell className="text-center">{p.goalsAgainst}</TableCell>
-              <TableCell className="text-center">{p.goalDifference}</TableCell>
-              <TableCell className="text-center font-bold">{p.points}</TableCell>
+              <TableCell className="text-center text-lg">{p.played}</TableCell>
+              <TableCell className="text-center text-lg">{p.wins}</TableCell>
+              <TableCell className="text-center text-lg">{p.draws}</TableCell>
+              <TableCell className="text-center text-lg">{p.losses}</TableCell>
+              <TableCell className="text-center text-lg">{p.goalsFor}</TableCell>
+              <TableCell className="text-center text-lg">{p.goalsAgainst}</TableCell>
+              <TableCell className="text-center text-lg">{p.goalDifference}</TableCell>
+              <TableCell className="text-center font-bold text-xl">{p.points}</TableCell>
             </TableRow>
           ))}
         </TableBody>

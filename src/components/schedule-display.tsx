@@ -40,7 +40,7 @@ export default function ScheduleDisplay({ schedule, onScoreChange, onRandomizeFi
                            </Button>
                         )}
                       </TableCell>
-                      <TableCell className="font-medium text-center">{match.bye ? '-' : (match.field > 0 ? match.field : '--')}</TableCell>
+                      <TableCell className="font-medium text-center text-lg">{match.bye ? '-' : (match.field > 0 ? match.field : '--')}</TableCell>
                       <TableCell>{match.player1}</TableCell>
                       <TableCell className="text-center">
                         {match.bye ? (
@@ -52,16 +52,16 @@ export default function ScheduleDisplay({ schedule, onScoreChange, onRandomizeFi
                               min="0"
                               value={match.player1Score ?? ''}
                               onChange={(e) => onScoreChange(roundIndex, matchIndex, 'player1', e.target.value === '' ? null : parseInt(e.target.value))}
-                              className="w-14 text-center"
+                              className="w-16 h-12 text-center text-2xl font-bold"
                               aria-label={`${match.player1} placar`}
                             />
-                            <span>-</span>
+                            <span className="text-2xl font-bold">-</span>
                             <Input
                               type="number"
                               min="0"
                               value={match.player2Score ?? ''}
                               onChange={(e) => onScoreChange(roundIndex, matchIndex, 'player2', e.target.value === '' ? null : parseInt(e.target.value))}
-                              className="w-14 text-center"
+                              className="w-16 h-12 text-center text-2xl font-bold"
                               aria-label={`${match.player2} placar`}
                             />
                           </div>

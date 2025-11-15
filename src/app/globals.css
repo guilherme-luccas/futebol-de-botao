@@ -34,7 +34,7 @@
 
 @layer base {
   html {
-    @apply text-lg;
+    @apply text-xl;
   }
   * {
     @apply border-border;
