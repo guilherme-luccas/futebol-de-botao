@@ -11,7 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Trophy, Users, Shield, Calendar, Loader2, Minus, Plus } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Trophy, Users, Shield, Calendar, Loader2, Minus, Plus, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -227,7 +228,29 @@ export default function TournamentDashboard() {
         </div>
         <div className="flex items-center gap-4">
             {view === 'tournament' && (
-              <Button onClick={startNewTournament}>Novo Torneio</Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button variant="destructive">
+                        <AlertTriangle className="mr-2 h-4 w-4" />
+                        Novo Torneio
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Esta ação não pode ser desfeita. Isso irá apagar permanentemente
+                      todos os dados do torneio atual e reiniciar a configuração.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={startNewTournament}>
+                      Confirmar
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
         </div>
       </header>
