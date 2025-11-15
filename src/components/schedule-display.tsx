@@ -3,8 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Dices } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ScheduleDisplayProps {
   schedule: Schedule;
@@ -13,6 +12,11 @@ interface ScheduleDisplayProps {
 }
 
 export default function ScheduleDisplay({ schedule, onScoreChange, onRandomizeField }: ScheduleDisplayProps) {
+
+  const getWinnerClass = (isWinner: boolean) => {
+    return isWinner ? "bg-accent/30 transition-all duration-500" : "";
+  }
+
   return (
     <Accordion type="single" collapsible className="w-full" defaultValue="item-0">
       {schedule.schedule.map((round, roundIndex) => (
@@ -23,25 +27,15 @@ export default function ScheduleDisplay({ schedule, onScoreChange, onRandomizeFi
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[80px]"></TableHead>
-                    <TableHead className="w-[80px]">Campo</TableHead>
-                    <TableHead>Jogador 1</TableHead>
-                    <TableHead className="w-[120px] text-center">Placar</TableHead>
-                    <TableHead>Jogador 2</TableHead>
+                    <TableHead className="w-[40%]">Jogador 1</TableHead>
+                    <TableHead className="w-[20%] text-center">Placar</TableHead>
+                    <TableHead className="w-[40%] text-right">Jogador 2</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {round.matches.map((match, matchIndex) => (
                     <TableRow key={`${match.player1}-${match.player2}-${matchIndex}`}>
-                      <TableCell>
-                        {!match.bye && (
-                           <Button variant="ghost" size="icon" onClick={() => onRandomizeField(roundIndex, matchIndex)}>
-                            <Dices className="h-5 w-5" />
-                           </Button>
-                        )}
-                      </TableCell>
-                      <TableCell className="font-medium text-center text-lg">{match.bye ? '-' : (match.field > 0 ? match.field : '--')}</TableCell>
-                      <TableCell>{match.player1}</TableCell>
+                      <TableCell className={cn("text-lg font-medium", getWinnerClass(match.winner === 'player1'))}>{match.player1}</TableCell>
                       <TableCell className="text-center">
                         {match.bye ? (
                           <Badge variant="outline">FOLGA</Badge>
@@ -52,22 +46,22 @@ export default function ScheduleDisplay({ schedule, onScoreChange, onRandomizeFi
                               min="0"
                               value={match.player1Score ?? ''}
                               onChange={(e) => onScoreChange(roundIndex, matchIndex, 'player1', e.target.value === '' ? null : parseInt(e.target.value))}
-                              className="w-16 h-12 text-center text-2xl font-bold"
+                              className="w-16 h-12 text-center text-3xl font-bold"
                               aria-label={`${match.player1} placar`}
                             />
-                            <span className="text-2xl font-bold">-</span>
+                            <span className="text-3xl font-bold">-</span>
                             <Input
                               type="number"
                               min="0"
                               value={match.player2Score ?? ''}
                               onChange={(e) => onScoreChange(roundIndex, matchIndex, 'player2', e.target.value === '' ? null : parseInt(e.target.value))}
-                              className="w-16 h-12 text-center text-2xl font-bold"
+                              className="w-16 h-12 text-center text-3xl font-bold"
                               aria-label={`${match.player2} placar`}
                             />
                           </div>
                         )}
                       </TableCell>
-                      <TableCell>{match.player2}</TableCell>
+                      <TableCell className={cn("text-lg font-medium text-right", getWinnerClass(match.winner === 'player2'))}>{match.player2}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

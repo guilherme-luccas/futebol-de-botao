@@ -10,6 +10,7 @@ export interface Match {
   player1Score: number | null;
   player2Score: number | null;
   bye?: boolean;
+  winner?: 'player1' | 'player2' | null;
 }
 
 export interface Round {

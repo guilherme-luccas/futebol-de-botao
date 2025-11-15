@@ -91,6 +91,7 @@ export default function TournamentDashboard() {
             player1Score: null,
             player2Score: null,
             field: 0,
+            winner: null,
           })),
         })),
       };
@@ -119,6 +120,19 @@ export default function TournamentDashboard() {
     } else {
       match.player2Score = score;
     }
+
+    if (match.player1Score !== null && match.player2Score !== null) {
+        if(match.player1Score > match.player2Score) {
+            match.winner = 'player1';
+        } else if (match.player2Score > match.player1Score) {
+            match.winner = 'player2';
+        } else {
+            match.winner = null; // Empate
+        }
+    } else {
+        match.winner = null;
+    }
+
 
     setSchedule(newSchedule);
   };
