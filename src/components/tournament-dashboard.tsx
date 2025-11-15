@@ -324,7 +324,7 @@ export default function TournamentDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl"><Trophy/> Classificação</CardTitle>
-              </Header>
+              </CardHeader>
               <CardContent>
                 <RankingsTable rankings={rankings} />
               </CardContent>
@@ -336,7 +336,7 @@ export default function TournamentDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl"><Trophy/> Mata-mata</CardTitle>
                 <CardDescription>Os 4 melhores jogadores avançam para o mata-mata!</CardDescription>
-              </Header>
+              </CardHeader>
               <CardContent>
                 <PlayoffBracket playoffs={playoffs} onScoreChange={handlePlayoffScoreChange} />
               </CardContent>
