@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Trophy, Users, Shield, Calendar, Loader2, Minus, Plus, Timer } from "lucide-react";
+import { Trophy, Users, Shield, Calendar, Loader2, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -34,95 +34,6 @@ const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
       <path d="M2 12a5 5 0 0 0 5 5 5 5 0 0 0 5-5 5 5 0 0 0-5-5 5 5 0 0 0-5 5z" />
     </svg>
 );
-
-const GameTimer = () => {
-    const [isTiming, setIsTiming] = useState(false);
-    const audioContextRef = useRef<AudioContext | null>(null);
-
-    // Initialize AudioContext only on the client-side
-    useEffect(() => {
-        if (typeof window !== 'undefined' && !audioContextRef.current) {
-            audioContextRef.current = new window.AudioContext();
-        }
-        return () => {
-            if (audioContextRef.current) {
-                audioContextRef.current.close().catch(console.error);
-                audioContextRef.current = null;
-            }
-        };
-    }, []);
-
-    const playAlarm = useCallback(() => {
-        const context = audioContextRef.current;
-        if (!context) return;
-
-        if (context.state === 'suspended') {
-            context.resume();
-        }
-        
-        const playBeep = (freq: number, startTime: number, duration: number) => {
-            const oscillator = context.createOscillator();
-            const gainNode = context.createGain();
-
-            oscillator.connect(gainNode);
-            gainNode.connect(context.destination);
-
-            oscillator.type = 'square';
-            oscillator.frequency.setValueAtTime(freq, startTime);
-            gainNode.gain.setValueAtTime(1, startTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-
-            oscillator.start(startTime);
-            oscillator.stop(startTime + duration);
-        };
-
-        const now = context.currentTime;
-        const beepDuration = 0.1;
-        const interval = 0.15;
-        const totalDuration = 7;
-        const beepCount = Math.floor(totalDuration / interval);
-
-        for (let i = 0; i < beepCount; i++) {
-            playBeep(988, now + i * interval, beepDuration);
-        }
-    }, []);
-
-    useEffect(() => {
-        let timerId: NodeJS.Timeout | undefined;
-        if (isTiming) {
-            timerId = setTimeout(() => {
-                playAlarm();
-                setIsTiming(false);
-            }, 10000); // 10 seconds
-        }
-        return () => {
-            if (timerId) {
-                clearTimeout(timerId);
-            }
-        };
-    }, [isTiming, playAlarm]);
-
-    const handleTimerClick = () => {
-        if (!isTiming) {
-            const context = audioContextRef.current;
-            if (context && context.state === 'suspended') {
-                context.resume().then(() => {
-                    setIsTiming(true);
-                });
-            } else {
-                setIsTiming(true);
-            }
-        }
-    };
-
-    return (
-        <Button onClick={handleTimerClick} disabled={isTiming} variant="outline" size="icon" className="relative">
-           <Timer className={`h-5 w-5 ${isTiming ? 'animate-pulse text-destructive' : ''}`} />
-           <span className="sr-only">Iniciar Cronômetro de 10 segundos</span>
-        </Button>
-    );
-};
-
 
 export default function TournamentDashboard() {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -349,7 +260,6 @@ export default function TournamentDashboard() {
           </h1>
         </div>
         <div className="flex items-center gap-4">
-            {view === 'tournament' && <GameTimer />}
             {view === 'tournament' && (
               <Button onClick={startNewTournament}>Novo Torneio</Button>
             )}
