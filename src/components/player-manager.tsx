@@ -20,8 +20,9 @@ export default function PlayerManager({ players, setPlayers }: PlayerManagerProp
   const { toast } = useToast();
 
   const handleAddPlayer = () => {
-    if (newPlayerName.trim() && !players.some(p => p.name.toLowerCase() === newPlayerName.trim().toLowerCase())) {
-      setPlayers([...players, { id: crypto.randomUUID(), name: newPlayerName.trim() }]);
+    const trimmedName = newPlayerName.trim().toUpperCase();
+    if (trimmedName && !players.some(p => p.name === trimmedName)) {
+      setPlayers([...players, { id: crypto.randomUUID(), name: trimmedName }]);
       setNewPlayerName("");
     } else {
         toast({

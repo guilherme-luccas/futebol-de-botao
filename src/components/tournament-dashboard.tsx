@@ -50,7 +50,7 @@ export default function TournamentDashboard() {
       setRankings(newRankings);
       if (areAllMatchesPlayed(schedule)) {
         const top4Rankings = newRankings.slice(0, 4);
-        if (top4Rankings.length === 4) {
+        if (top4Rankings.length >= 4) {
           setPlayoffs(generatePlayoffs(top4Rankings));
         }
       }
@@ -184,20 +184,31 @@ export default function TournamentDashboard() {
               } else {
                   match.winner = null;
               }
+          } else {
+            match.winner = null;
           }
       }
 
       // Populate Final
-      const semi1Winner = newPlayoffs.semiFinals[0].winner;
-      const semi2Winner = newPlayoffs.semiFinals[1].winner;
+      const semi1WinnerName = newPlayoffs.semiFinals[0].winner;
+      const semi2WinnerName = newPlayoffs.semiFinals[1].winner;
       const semi1 = newPlayoffs.semiFinals[0];
       const semi2 = newPlayoffs.semiFinals[1];
 
-      if(semi1Winner && semi1.player1 && semi1.player2) {
-        newPlayoffs.final.player1 = semi1.player1.name === semi1Winner ? semi1.player1 : semi1.player2;
+      if(semi1WinnerName && semi1.player1 && semi1.player2) {
+        newPlayoffs.final.player1 = semi1.player1.name === semi1WinnerName ? semi1.player1 : semi1.player2;
+      } else {
+        newPlayoffs.final.player1 = null;
+        newPlayoffs.final.player1Score = null;
+        newPlayoffs.final.player2Score = null;
       }
-      if(semi2Winner && semi2.player1 && semi2.player2) {
-        newPlayoffs.final.player2 = semi2.player1.name === semi2Winner ? semi2.player1 : semi2.player2;
+
+      if(semi2WinnerName && semi2.player1 && semi2.player2) {
+        newPlayoffs.final.player2 = semi2.player1.name === semi2WinnerName ? semi2.player1 : semi2.player2;
+      } else {
+        newPlayoffs.final.player2 = null;
+        newPlayoffs.final.player1Score = null;
+        newPlayoffs.final.player2Score = null;
       }
 
       if (newPlayoffs.final.player1Score !== null && newPlayoffs.final.player2Score !== null) {
@@ -208,6 +219,8 @@ export default function TournamentDashboard() {
           } else {
               newPlayoffs.final.winner = null;
           }
+      } else {
+        newPlayoffs.final.winner = null;
       }
   
       setPlayoffs(newPlayoffs);
