@@ -7,12 +7,13 @@ import PlayerManager from "@/components/player-manager";
 import ScheduleDisplay from "@/components/schedule-display";
 import RankingsTable from "@/components/rankings-table";
 import PlayoffBracket from "@/components/playoff-bracket";
+import GameTimer from "@/components/game-timer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Trophy, Users, Shield, Calendar, Loader2, Minus, Plus, AlertTriangle } from "lucide-react";
+import { Trophy, Users, Shield, Calendar, Loader2, Minus, Plus, AlertTriangle, Timer } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialogTrigger } from "@radix-ui/react-alert-dialog";
 
@@ -82,7 +83,6 @@ export default function TournamentDashboard() {
     try {
       const result = generateRoundRobinSchedule(
         players.map((p) => p.name),
-        numFields,
       );
 
       const initialSchedule: Schedule = {
@@ -134,7 +134,6 @@ export default function TournamentDashboard() {
     } else {
         match.winner = undefined;
     }
-
 
     setSchedule(newSchedule);
   };
@@ -252,7 +251,7 @@ export default function TournamentDashboard() {
       <header className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <FootballIcon className="h-10 w-10 text-primary" />
-          <h1 className="text-3xl md:text-4xl font-bold font-headline">
+          <h1 className="text-3xl md:text-5xl font-bold font-headline">
             Torneio de Futebol de Botão
           </h1>
         </div>
@@ -309,7 +308,7 @@ export default function TournamentDashboard() {
                   value={numFields}
                   onChange={(e) => setNumFields(Math.max(1, parseInt(e.target.value) || 1))}
                   min="1"
-                  className="w-16 text-center"
+                  className="w-16 text-center text-lg"
                 />
                 <Button variant="outline" size="icon" onClick={() => setNumFields(numFields + 1)}>
                     <Plus className="h-4 w-4" />
@@ -328,6 +327,15 @@ export default function TournamentDashboard() {
         </Card>
       ) : (
         <div className="space-y-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-2xl"><Timer/> Cronômetro da Partida</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <GameTimer />
+            </CardContent>
+          </Card>
+
           {schedule && (
             <Card>
               <CardHeader>
@@ -367,3 +375,5 @@ export default function TournamentDashboard() {
     </div>
   );
 }
+
+    
