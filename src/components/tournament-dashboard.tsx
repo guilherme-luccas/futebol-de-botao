@@ -128,11 +128,15 @@ export default function TournamentDashboard() {
     const round = newSchedule.schedule[roundIndex];
     const currentMatch = round.matches[matchIndex];
 
+    // Todos os campos possíveis
     const allFields = Array.from({ length: numFields }, (_, i) => i + 1);
+    
+    // Campos já usados por outras partidas nesta rodada
     const usedFields = round.matches
-        .filter((match, index) => index !== matchIndex && !match.bye)
+        .filter((match, index) => index !== matchIndex && !match.bye && match.field > 0)
         .map(match => match.field);
 
+    // Campos disponíveis para sorteio
     const availableFields = allFields.filter(field => !usedFields.includes(field));
 
     if (availableFields.length === 0) {
@@ -144,11 +148,18 @@ export default function TournamentDashboard() {
         return;
     }
     
+    // Filtra o campo atual da lista de disponíveis para garantir que, se possível, um novo campo seja escolhido
+    const fieldsToChooseFrom = availableFields.filter(field => field !== currentMatch.field);
+    
     let newField;
-    do {
-      newField = availableFields[Math.floor(Math.random() * availableFields.length)];
-    } while (availableFields.length > 1 && newField === currentMatch.field);
-
+    if (fieldsToChooseFrom.length > 0) {
+      // Sorteia um novo campo da lista de disponíveis (excluindo o atual)
+      newField = fieldsToChooseFrom[Math.floor(Math.random() * fieldsToChooseFrom.length)];
+    } else {
+      // Se o único campo disponível é o atual, mantém ele (não há outra opção)
+      newField = availableFields[0];
+    }
+    
     currentMatch.field = newField;
     setSchedule(newSchedule);
   };
