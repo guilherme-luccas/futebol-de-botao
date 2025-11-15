@@ -122,12 +122,9 @@ export function generatePlayoffs(top4Rankings: Ranking[]): Playoff | null {
 
 export function generateRoundRobinSchedule(playerNames: string[], numFields: number): Schedule {
     let players = [...playerNames];
-    const originalPlayerCount = players.length;
-    let hasBye = false;
     
     if (players.length % 2 !== 0) {
         players.push("FOLGA");
-        hasBye = true;
     }
 
     const numPlayers = players.length;
@@ -168,6 +165,13 @@ export function generateRoundRobinSchedule(playerNames: string[], numFields: num
                 }
             }
         }
+        
+        // Sort to move the "bye" match to the end
+        roundMatches.sort((a, b) => {
+            if (a.bye && !b.bye) return 1;
+            if (!a.bye && b.bye) return -1;
+            return 0;
+        });
         
         rounds.push({
             round: i + 1,
