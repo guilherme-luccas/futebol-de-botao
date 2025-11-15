@@ -11,9 +11,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Trophy, Users, Shield, Calendar, Loader2, Minus, Plus, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { AlertDialogTrigger } from "@radix-ui/react-alert-dialog";
 
 const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
@@ -136,6 +137,35 @@ export default function TournamentDashboard() {
 
 
     setSchedule(newSchedule);
+  };
+
+  const handleDrawFields = (roundIndex: number) => {
+    if (!schedule || numFields <= 1) return;
+
+    const newSchedule = JSON.parse(JSON.stringify(schedule));
+    const round = newSchedule.schedule[roundIndex];
+    const realMatches = round.matches.filter((m: any) => !m.bye);
+    const availableFields = Array.from({ length: numFields }, (_, i) => i + 1);
+
+    // Fisher-Yates shuffle
+    for (let i = availableFields.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [availableFields[i], availableFields[j]] = [availableFields[j], availableFields[i]];
+    }
+
+    let fieldIndex = 0;
+    for (const match of round.matches) {
+        if (!match.bye) {
+            match.field = availableFields[fieldIndex % availableFields.length];
+            fieldIndex++;
+        }
+    }
+    
+    setSchedule(newSchedule);
+    toast({
+        title: "Campos Sorteados!",
+        description: `Os campos para a rodada ${round.round} foram definidos.`,
+    })
   };
   
   const handlePlayoffScoreChange = (matchId: string, player: 'player1' | 'player2', score: number | null) => {
@@ -304,7 +334,7 @@ export default function TournamentDashboard() {
                 <CardTitle className="flex items-center gap-2 text-2xl"><Calendar/> Tabela de Jogos</CardTitle>
               </CardHeader>
               <CardContent>
-                <ScheduleDisplay schedule={schedule} onScoreChange={handleScoreChange} />
+                <ScheduleDisplay schedule={schedule} onScoreChange={handleScoreChange} onDrawFields={handleDrawFields} numFields={numFields} />
               </CardContent>
             </Card>
           )}
