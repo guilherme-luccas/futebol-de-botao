@@ -122,55 +122,75 @@ export function generatePlayoffs(top4Rankings: Ranking[]): Playoff | null {
 
 export function generateRoundRobinSchedule(playerNames: string[], numFields: number): Schedule {
     let players = [...playerNames];
-    let byePlayer: string | null = null;
+    const originalPlayerCount = players.length;
+    let hasBye = false;
     
     if (players.length % 2 !== 0) {
-        byePlayer = "FOLGA";
-        players.push(byePlayer);
+        players.push("FOLGA");
+        hasBye = true;
     }
 
     const numPlayers = players.length;
-    const numRounds = numPlayers - 1;
+    const numRounds = hasBye ? numPlayers : numPlayers -1;
     const matchesPerRound = numPlayers / 2;
     const rounds: Round[] = [];
+
+    const playerIndices = players.map((_, i) => i);
+    const fixedPlayer = playerIndices.shift() as number;
 
     for (let i = 0; i < numRounds; i++) {
         const roundMatches: Omit<Match, 'player1Score' | 'player2Score'>[] = [];
         
-        for (let j = 0; j < matchesPerRound; j++) {
-            const player1 = players[j];
-            const player2 = players[numPlayers - 1 - j];
+        // Add match for the fixed player
+        let opponentIndex = playerIndices[0];
+        let p1 = players[fixedPlayer];
+        let p2 = players[opponentIndex];
+        if (p1 !== 'FOLGA' && p2 !== 'FOLGA') {
+            roundMatches.push({
+                field: 0, // will be assigned later
+                player1: p1,
+                player2: p2,
+                bye: false,
+            });
+        }
 
-            if (player1 !== byePlayer && player2 !== byePlayer) {
+        // Add other matches
+        for (let j = 1; j < matchesPerRound; j++) {
+            const player1Index = playerIndices[j];
+            const player2Index = playerIndices[playerIndices.length - j];
+            p1 = players[player1Index];
+            p2 = players[player2Index];
+            if (p1 !== 'FOLGA' && p2 !== 'FOLGA') {
                 roundMatches.push({
-                    field: (roundMatches.length % numFields) + 1,
-                    player1: player1,
-                    player2: player2,
+                    field: 0, // will be assigned later
+                    player1: p1,
+                    player2: p2,
                     bye: false,
                 });
             }
         }
         
         // Handle bye
-        if (byePlayer) {
-            const playerWithBye = players.find(p => ![...roundMatches.map(m => m.player1), ...roundMatches.map(m => m.player2)].includes(p));
-            if(playerWithBye && playerWithBye !== byePlayer) {
+        if (hasBye) {
+            const allPlayersInMatches = roundMatches.flatMap(m => [m.player1, m.player2]);
+            const playerWithBye = playerNames.find(p => !allPlayersInMatches.includes(p));
+            if(playerWithBye) {
                  roundMatches.push({
-                    field: (roundMatches.length % numFields) + 1,
+                    field: 0,
                     player1: playerWithBye,
                     player2: 'FOLGA',
                     bye: true
                 });
             }
         }
-        
-        const unassignedMatches = roundMatches.filter(m => !m.field);
-        let fieldCounter = 1;
-        unassignedMatches.forEach(match => {
-            match.field = fieldCounter;
-            fieldCounter = (fieldCounter % numFields) + 1;
-        });
 
+        // Assign fields
+        const matchesWithPlayers = roundMatches.filter(m => !m.bye);
+        for(let k=0; k<matchesWithPlayers.length; k++){
+            matchesWithPlayers[k].field = (k % numFields) + 1;
+        }
+        
+        roundMatches.sort((a, b) => (a.field || 99) - (b.field || 99));
 
         rounds.push({
             round: i + 1,
@@ -178,39 +198,15 @@ export function generateRoundRobinSchedule(playerNames: string[], numFields: num
         });
 
         // Rotate players for the next round
-        const lastPlayer = players.pop();
-        if (lastPlayer) {
-            players.splice(1, 0, lastPlayer);
-        }
+        const last = playerIndices.pop() as number;
+        playerIndices.unshift(last);
     }
     
-    // Distribute matches across fields
-    const finalRounds: Round[] = [];
-    for(const round of rounds) {
-      const newMatches: Match[] = [];
-      const matchesWithPlayers = round.matches.filter(m => !m.bye);
-      
-      for(let i = 0; i < matchesWithPlayers.length; i++) {
-        newMatches.push({
-          ...matchesWithPlayers[i],
-          field: (i % numFields) + 1,
-        });
-      }
-
-      const byeMatch = round.matches.find(m => m.bye);
-      if(byeMatch) {
-        newMatches.push({
-          ...byeMatch,
-          field: 0, // No field for a bye
-        });
-      }
-
-      finalRounds.push({
-        ...round,
-        matches: newMatches.sort((a,b) => a.field - b.field)
-      });
+    // Ensure correct number of rounds for even players
+    if (!hasBye && rounds.length > originalPlayerCount - 1) {
+        rounds.pop();
     }
 
 
-    return { schedule: finalRounds };
+    return { schedule: rounds };
 }
