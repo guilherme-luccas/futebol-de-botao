@@ -75,7 +75,7 @@ export default function ScheduleDisplay({ schedule, onScoreChange, onDrawFields,
                                 <TableBody>
                                 {round.matches.map((match, matchIndex) => (
                                     <TableRow key={`${match.player1}-${match.player2}-${matchIndex}`}>
-                                    <TableCell className={cn("text-lg font-medium", match.winner !== undefined && getMatchResultClass(match.winner, 'player1'))}>{match.player1}</TableCell>
+                                    <TableCell className={cn("text-lg font-medium", !match.bye && match.winner !== undefined && getMatchResultClass(match.winner, 'player1'))}>{match.player1}</TableCell>
                                     <TableCell className="text-center">
                                         {match.bye ? (
                                         <Badge variant="outline">FOLGA</Badge>
@@ -101,7 +101,7 @@ export default function ScheduleDisplay({ schedule, onScoreChange, onDrawFields,
                                         </div>
                                         )}
                                     </TableCell>
-                                    <TableCell className={cn("text-lg font-medium text-right", match.winner !== undefined && getMatchResultClass(match.winner, 'player2'))}>{match.player2}</TableCell>
+                                    <TableCell className={cn("text-lg font-medium text-right", !match.bye && match.winner !== undefined && getMatchResultClass(match.winner, 'player2'))}>{match.player2}</TableCell>
                                      <TableCell className="text-center text-lg font-bold">
                                         {!match.bye && match.field > 0 ? match.field : '-'}
                                      </TableCell>
