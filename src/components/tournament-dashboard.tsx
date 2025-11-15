@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type { Ranking, Schedule, Player, Playoff } from "@/lib/types";
 import { calculateRankings, generatePlayoffs, areAllMatchesPlayed, generateRoundRobinSchedule } from "@/lib/tournament-logic";
 import PlayerManager from "@/components/player-manager";
@@ -19,7 +19,7 @@ const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
       xmlns="http://www.w3.org/2000/svg"
       width="24"
       height="24"
-      viewBox="0 0 24 24"
+      viewBox="0 0 24"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -37,71 +37,75 @@ const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
 
 const GameTimer = () => {
     const [isTiming, setIsTiming] = useState(false);
-    const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+    const audioContextRef = useRef<AudioContext | null>(null);
 
     useEffect(() => {
-        if (typeof window !== 'undefined') {
-            setAudioContext(new window.AudioContext());
+        if (typeof window !== 'undefined' && !audioContextRef.current) {
+            audioContextRef.current = new window.AudioContext();
         }
         return () => {
-            audioContext?.close();
+            if (audioContextRef.current) {
+                audioContextRef.current.close().catch(console.error);
+                audioContextRef.current = null;
+            }
         };
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }, []);
 
     const playAlarm = useCallback(() => {
-        if (!audioContext) return;
-        
+        const context = audioContextRef.current;
+        if (!context) return;
+
         const playBeep = (freq: number, startTime: number, duration: number) => {
-          const oscillator = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
-          
-          oscillator.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-          
-          oscillator.type = 'square'; 
-          oscillator.frequency.setValueAtTime(freq, startTime);
-          gainNode.gain.setValueAtTime(1, startTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
-          
-          oscillator.start(startTime);
-          oscillator.stop(startTime + duration);
+            const oscillator = context.createOscillator();
+            const gainNode = context.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(context.destination);
+
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(freq, startTime);
+            gainNode.gain.setValueAtTime(1, startTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+            oscillator.start(startTime);
+            oscillator.stop(startTime + duration);
         };
 
-        const now = audioContext.currentTime;
+        const now = context.currentTime;
         const beepDuration = 0.1;
         const interval = 0.15;
-        const totalDuration = 7; // seconds
+        const totalDuration = 7;
         const beepCount = Math.floor(totalDuration / interval);
 
         for (let i = 0; i < beepCount; i++) {
-            playBeep(988, now + i * interval, beepDuration); // B5
+            playBeep(988, now + i * interval, beepDuration);
         }
-
-    }, [audioContext]);
-
+    }, []);
 
     useEffect(() => {
-        if (!isTiming) return;
+        let timerId: NodeJS.Timeout;
+        if (isTiming) {
+            timerId = setTimeout(() => {
+                playAlarm();
+                setIsTiming(false);
+            }, 10000); // 10 seconds
+        }
 
-        const timerId = setTimeout(() => {
-            playAlarm();
-            setIsTiming(false);
-        }, 10000); // 10 seconds
-
-        return () => clearTimeout(timerId);
+        return () => {
+            clearTimeout(timerId);
+        };
     }, [isTiming, playAlarm]);
 
-
     const handleTimerClick = () => {
-        if (!isTiming && audioContext) {
-            // User interaction is required to start audio context
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
+        const context = audioContextRef.current;
+        if (context && context.state === 'suspended') {
+            context.resume();
+        }
+        if (!isTiming) {
             setIsTiming(true);
         }
     };
-    
+
     return (
         <Button onClick={handleTimerClick} disabled={isTiming} variant="outline" size="icon" className="relative">
            <Timer className={`h-5 w-5 ${isTiming ? 'animate-pulse text-destructive' : ''}`} />
@@ -109,6 +113,7 @@ const GameTimer = () => {
         </Button>
     );
 };
+
 
 export default function TournamentDashboard() {
   const [players, setPlayers] = useState<Player[]>([]);
@@ -400,7 +405,7 @@ export default function TournamentDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl"><Trophy/> Classificação</CardTitle>
-              </CardHeader>
+              </Header>
               <CardContent>
                 <RankingsTable rankings={rankings} />
               </CardContent>
