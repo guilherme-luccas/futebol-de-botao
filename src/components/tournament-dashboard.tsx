@@ -39,6 +39,7 @@ const GameTimer = () => {
     const [isTiming, setIsTiming] = useState(false);
     const audioContextRef = useRef<AudioContext | null>(null);
 
+    // Initialize AudioContext only on the client-side
     useEffect(() => {
         if (typeof window !== 'undefined' && !audioContextRef.current) {
             audioContextRef.current = new window.AudioContext();
@@ -55,6 +56,10 @@ const GameTimer = () => {
         const context = audioContextRef.current;
         if (!context) return;
 
+        if (context.state === 'suspended') {
+            context.resume();
+        }
+        
         const playBeep = (freq: number, startTime: number, duration: number) => {
             const oscillator = context.createOscillator();
             const gainNode = context.createGain();
@@ -83,26 +88,30 @@ const GameTimer = () => {
     }, []);
 
     useEffect(() => {
-        let timerId: NodeJS.Timeout;
+        let timerId: NodeJS.Timeout | undefined;
         if (isTiming) {
             timerId = setTimeout(() => {
                 playAlarm();
                 setIsTiming(false);
             }, 10000); // 10 seconds
         }
-
         return () => {
-            clearTimeout(timerId);
+            if (timerId) {
+                clearTimeout(timerId);
+            }
         };
     }, [isTiming, playAlarm]);
 
     const handleTimerClick = () => {
-        const context = audioContextRef.current;
-        if (context && context.state === 'suspended') {
-            context.resume();
-        }
         if (!isTiming) {
-            setIsTiming(true);
+            const context = audioContextRef.current;
+            if (context && context.state === 'suspended') {
+                context.resume().then(() => {
+                    setIsTiming(true);
+                });
+            } else {
+                setIsTiming(true);
+            }
         }
     };
 
