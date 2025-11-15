@@ -24,8 +24,15 @@ export default function ScheduleDisplay({ schedule, onScoreChange, onDrawFields,
   const expandAll = () => setOpenRounds(allRoundKeys);
   const collapseAll = () => setOpenRounds([]);
 
-  const getWinnerClass = (isWinner: boolean) => {
-    return isWinner ? "bg-accent/30 transition-all duration-500" : "";
+  const getMatchResultClass = (winner: 'player1' | 'player2' | null, currentPlayer: 'player1' | 'player2') => {
+    const baseClass = "transition-all duration-500";
+    if (winner === null) {
+      return `bg-yellow-400/20 ${baseClass}`; // Empate
+    }
+    if (winner === currentPlayer) {
+      return `bg-accent/30 ${baseClass}`; // Vencedor
+    }
+    return `bg-destructive/20 ${baseClass}`; // Perdedor
   }
 
   return (
@@ -68,7 +75,7 @@ export default function ScheduleDisplay({ schedule, onScoreChange, onDrawFields,
                                 <TableBody>
                                 {round.matches.map((match, matchIndex) => (
                                     <TableRow key={`${match.player1}-${match.player2}-${matchIndex}`}>
-                                    <TableCell className={cn("text-lg font-medium", getWinnerClass(match.winner === 'player1'))}>{match.player1}</TableCell>
+                                    <TableCell className={cn("text-lg font-medium", match.winner !== undefined && getMatchResultClass(match.winner, 'player1'))}>{match.player1}</TableCell>
                                     <TableCell className="text-center">
                                         {match.bye ? (
                                         <Badge variant="outline">FOLGA</Badge>
@@ -94,7 +101,7 @@ export default function ScheduleDisplay({ schedule, onScoreChange, onDrawFields,
                                         </div>
                                         )}
                                     </TableCell>
-                                    <TableCell className={cn("text-lg font-medium text-right", getWinnerClass(match.winner === 'player2'))}>{match.player2}</TableCell>
+                                    <TableCell className={cn("text-lg font-medium text-right", match.winner !== undefined && getMatchResultClass(match.winner, 'player2'))}>{match.player2}</TableCell>
                                      <TableCell className="text-center text-lg font-bold">
                                         {!match.bye && match.field > 0 ? match.field : '-'}
                                      </TableCell>

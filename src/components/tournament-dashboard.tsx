@@ -93,7 +93,7 @@ export default function TournamentDashboard() {
             player1Score: null,
             player2Score: null,
             field: 0,
-            winner: null,
+            winner: undefined,
           })),
         })),
       };
@@ -132,7 +132,7 @@ export default function TournamentDashboard() {
             match.winner = null; // Empate
         }
     } else {
-        match.winner = null;
+        match.winner = undefined;
     }
 
 
