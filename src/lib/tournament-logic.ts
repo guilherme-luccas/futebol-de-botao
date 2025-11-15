@@ -131,7 +131,7 @@ export function generateRoundRobinSchedule(playerNames: string[], numFields: num
     }
 
     const numPlayers = players.length;
-    const numRounds = hasBye ? numPlayers : numPlayers -1;
+    const numRounds = numPlayers - 1;
     const matchesPerRound = numPlayers / 2;
     const rounds: Round[] = [];
 
@@ -141,72 +141,42 @@ export function generateRoundRobinSchedule(playerNames: string[], numFields: num
     for (let i = 0; i < numRounds; i++) {
         const roundMatches: Omit<Match, 'player1Score' | 'player2Score'>[] = [];
         
-        // Add match for the fixed player
         let opponentIndex = playerIndices[0];
         let p1 = players[fixedPlayer];
         let p2 = players[opponentIndex];
+        
         if (p1 !== 'FOLGA' && p2 !== 'FOLGA') {
-            roundMatches.push({
-                field: 0, // will be assigned later
-                player1: p1,
-                player2: p2,
-                bye: false,
-            });
+            roundMatches.push({ field: 0, player1: p1, player2: p2, bye: false });
+        } else {
+             const playerWithBye = p1 === 'FOLGA' ? players[opponentIndex] : players[fixedPlayer];
+             if(playerWithBye){
+                roundMatches.push({ field: 0, player1: playerWithBye, player2: 'FOLGA', bye: true });
+             }
         }
 
-        // Add other matches
         for (let j = 1; j < matchesPerRound; j++) {
             const player1Index = playerIndices[j];
             const player2Index = playerIndices[playerIndices.length - j];
             p1 = players[player1Index];
             p2 = players[player2Index];
-            if (p1 !== 'FOLGA' && p2 !== 'FOLGA') {
-                roundMatches.push({
-                    field: 0, // will be assigned later
-                    player1: p1,
-                    player2: p2,
-                    bye: false,
-                });
+             if (p1 !== 'FOLGA' && p2 !== 'FOLGA') {
+                roundMatches.push({ field: 0, player1: p1, player2: p2, bye: false });
+            } else {
+                const playerWithBye = p1 === 'FOLGA' ? players[player2Index] : players[player1Index];
+                if(playerWithBye){
+                    roundMatches.push({ field: 0, player1: playerWithBye, player2: 'FOLGA', bye: true });
+                }
             }
         }
         
-        // Handle bye
-        if (hasBye) {
-            const allPlayersInMatches = roundMatches.flatMap(m => [m.player1, m.player2]);
-            const playerWithBye = playerNames.find(p => !allPlayersInMatches.includes(p));
-            if(playerWithBye) {
-                 roundMatches.push({
-                    field: 0,
-                    player1: playerWithBye,
-                    player2: 'FOLGA',
-                    bye: true
-                });
-            }
-        }
-
-        // Assign fields
-        const matchesWithPlayers = roundMatches.filter(m => !m.bye);
-        for(let k=0; k<matchesWithPlayers.length; k++){
-            matchesWithPlayers[k].field = (k % numFields) + 1;
-        }
-        
-        roundMatches.sort((a, b) => (a.field || 99) - (b.field || 99));
-
         rounds.push({
             round: i + 1,
             matches: roundMatches.map(m => ({ ...m, player1Score: null, player2Score: null }))
         });
 
-        // Rotate players for the next round
         const last = playerIndices.pop() as number;
         playerIndices.unshift(last);
     }
     
-    // Ensure correct number of rounds for even players
-    if (!hasBye && rounds.length > originalPlayerCount - 1) {
-        rounds.pop();
-    }
-
-
     return { schedule: rounds };
 }

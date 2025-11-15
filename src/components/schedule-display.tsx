@@ -40,7 +40,7 @@ export default function ScheduleDisplay({ schedule, onScoreChange, onRandomizeFi
                            </Button>
                         )}
                       </TableCell>
-                      <TableCell className="font-medium">{match.bye ? '-' : match.field}</TableCell>
+                      <TableCell className="font-medium text-center">{match.bye ? '-' : (match.field > 0 ? match.field : '--')}</TableCell>
                       <TableCell>{match.player1}</TableCell>
                       <TableCell className="text-center">
                         {match.bye ? (
