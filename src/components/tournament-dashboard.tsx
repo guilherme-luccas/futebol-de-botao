@@ -9,6 +9,7 @@ import RankingsTable from "@/components/rankings-table";
 import PlayoffBracket from "@/components/playoff-bracket";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Trophy, Users, Shield, Calendar, Loader2, Minus, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -78,7 +79,7 @@ export default function TournamentDashboard() {
     setIsLoading(true);
     try {
       const result = generateRoundRobinSchedule(
-        players.map((p) => p.name),
+        players.map((p) => p.name)
       );
 
       const initialSchedule: Schedule = {
@@ -123,19 +124,19 @@ export default function TournamentDashboard() {
 
   const handleRandomizeField = (roundIndex: number, matchIndex: number) => {
     if (!schedule || numFields <= 0) return;
-
+  
     const newSchedule = JSON.parse(JSON.stringify(schedule));
     const round = newSchedule.schedule[roundIndex];
     const currentMatch = round.matches[matchIndex];
-
+  
     const allFields = Array.from({ length: numFields }, (_, i) => i + 1);
     
     const usedFields = round.matches
-        .filter((match, index) => index !== matchIndex && !match.bye && match.field > 0)
-        .map(match => match.field);
-
+        .filter((match: any, index: number) => index !== matchIndex && !match.bye && match.field > 0)
+        .map((match: any) => match.field);
+  
     const availableFields = allFields.filter(field => !usedFields.includes(field));
-
+  
     if (availableFields.length === 0) {
         toast({
             variant: "destructive",
@@ -150,8 +151,16 @@ export default function TournamentDashboard() {
     let newField;
     if (fieldsToChooseFrom.length > 0) {
       newField = fieldsToChooseFrom[Math.floor(Math.random() * fieldsToChooseFrom.length)];
-    } else {
+    } else if (availableFields.length > 0) {
       newField = availableFields[0];
+    } else {
+      // This case should ideally not be reached if there's at least one field
+      toast({
+            variant: "destructive",
+            title: "Erro de Sorteio",
+            description: "Não foi possível sortear um novo campo.",
+      });
+      return;
     }
     
     currentMatch.field = newField;
@@ -266,9 +275,9 @@ export default function TournamentDashboard() {
           <CardContent className="space-y-6">
             <PlayerManager players={players} setPlayers={setPlayers} />
             <div className="space-y-2">
-              <label htmlFor="numFields" className="flex items-center gap-2 font-medium">
+              <Label htmlFor="numFields" className="flex items-center gap-2 font-medium">
                 <Shield /> Número de Campos
-              </label>
+              </Label>
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="icon" onClick={() => setNumFields(Math.max(1, numFields - 1))}>
                     <Minus className="h-4 w-4" />
@@ -325,7 +334,7 @@ export default function TournamentDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl"><Trophy/> Mata-mata</CardTitle>
                 <CardDescription>Os 4 melhores jogadores avançam para o mata-mata!</CardDescription>
-              </Header>
+              </CardHeader>
               <CardContent>
                 <PlayoffBracket playoffs={playoffs} onScoreChange={handlePlayoffScoreChange} />
               </CardContent>
