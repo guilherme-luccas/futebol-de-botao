@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect } from "react";
 import type { Ranking, Schedule, Player, Playoff } from "@/lib/types";
 import { calculateRankings, generatePlayoffs, areAllMatchesPlayed, generateRoundRobinSchedule } from "@/lib/tournament-logic";
 import PlayerManager from "@/components/player-manager";
