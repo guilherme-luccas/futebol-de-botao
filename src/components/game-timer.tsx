@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bell, Play, Pause, RefreshCw } from 'lucide-react';
+import { Bell, Play, Pause, RefreshCw, TimerOff } from 'lucide-react';
 
 const TIMER_SECONDS = 5;
 
@@ -52,17 +52,27 @@ export default function GameTimer() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-2xl">
-            <Bell /> Cronômetro da Partida
+            <Bell /> Alarme da Partida
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center gap-4">
-          <div className="text-8xl font-bold font-mono text-primary">
-            {time}
+          <div className="text-primary">
+            {isActive ? (
+                <div className="flex flex-col items-center gap-2">
+                    <Bell className="h-20 w-20 animate-pulse" />
+                    <p className="text-lg">O alarme tocará em {time}s...</p>
+                </div>
+            ) : (
+                <div className="flex flex-col items-center gap-2">
+                    <TimerOff className="h-20 w-20" />
+                    <p className="text-lg">O alarme está parado.</p>
+                </div>
+            )}
           </div>
           <div className="flex gap-4">
             <Button onClick={toggleTimer} size="lg">
               {isActive ? <Pause className="mr-2 h-6 w-6" /> : <Play className="mr-2 h-6 w-6" />}
-              {isActive ? 'Pausar' : time === 0 ? 'Iniciar' : 'Continuar'}
+              {isActive ? 'Pausar' : 'Iniciar Alarme'}
             </Button>
             <Button onClick={resetTimer} variant="outline" size="lg">
               <RefreshCw className="mr-2 h-6 w-6" />
