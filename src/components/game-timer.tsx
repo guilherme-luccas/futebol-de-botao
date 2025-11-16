@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Bell, Play, Pause, RefreshCw, TimerOff } from 'lucide-react';
+import { Bell, Play, Pause, RefreshCw, TimerOff, AlarmClockOff } from 'lucide-react';
 
 const TIMER_SECONDS = 5;
 
@@ -47,6 +47,34 @@ export default function GameTimer() {
     }
   };
 
+  const isPaused = !isActive && time > 0 && time < TIMER_SECONDS;
+
+  const renderStatus = () => {
+    if (isActive) {
+      return (
+        <div className="flex flex-col items-center gap-2">
+          <Bell className="h-20 w-20 animate-pulse" />
+          <p className="text-lg">Partida em andamento</p>
+        </div>
+      );
+    }
+    if (isPaused) {
+      return (
+        <div className="flex flex-col items-center gap-2">
+          <AlarmClockOff className="h-20 w-20" />
+          <p className="text-lg">Alarme pausado</p>
+        </div>
+      );
+    }
+    return (
+      <div className="flex flex-col items-center gap-2">
+        <TimerOff className="h-20 w-20" />
+        <p className="text-lg">Nenhuma partida em andamento</p>
+      </div>
+    );
+  };
+
+
   return (
     <>
       <Card>
@@ -56,18 +84,8 @@ export default function GameTimer() {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center gap-4">
-          <div className="text-primary">
-            {isActive ? (
-                <div className="flex flex-col items-center gap-2">
-                    <Bell className="h-20 w-20 animate-pulse" />
-                    <p className="text-lg">Partida em andamento</p>
-                </div>
-            ) : (
-                <div className="flex flex-col items-center gap-2">
-                    <TimerOff className="h-20 w-20" />
-                    <p className="text-lg">Nenhuma partida em andamento</p>
-                </div>
-            )}
+          <div className="text-primary h-[124px] flex items-center justify-center">
+            {renderStatus()}
           </div>
           <div className="flex gap-4">
             <Button onClick={toggleTimer} size="lg">
