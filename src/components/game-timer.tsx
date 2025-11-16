@@ -5,10 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bell, Play, Pause, RefreshCw, TimerOff, AlarmClockOff } from 'lucide-react';
 
-const TIMER_SECONDS = 5;
+interface GameTimerProps {
+    timerDuration: number;
+}
 
-export default function GameTimer() {
-  const [time, setTime] = useState(TIMER_SECONDS);
+export default function GameTimer({ timerDuration }: GameTimerProps) {
+  const [time, setTime] = useState(timerDuration);
   const [isActive, setIsActive] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -28,6 +30,11 @@ export default function GameTimer() {
       }
     };
   }, [isActive, time]);
+  
+  useEffect(() => {
+    setTime(timerDuration);
+  }, [timerDuration]);
+
 
   const toggleTimer = () => {
     if (time === 0) {
@@ -40,14 +47,14 @@ export default function GameTimer() {
 
   const resetTimer = () => {
     setIsActive(false);
-    setTime(TIMER_SECONDS);
+    setTime(timerDuration);
     audioRef.current?.pause();
     if (audioRef.current) {
         audioRef.current.currentTime = 0;
     }
   };
 
-  const isPaused = !isActive && time > 0 && time < TIMER_SECONDS;
+  const isPaused = !isActive && time > 0 && time < timerDuration;
 
   const renderStatus = () => {
     if (isActive) {

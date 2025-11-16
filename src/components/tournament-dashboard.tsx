@@ -11,11 +11,11 @@ import GameTimer from "@/components/game-timer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Trophy, Users, Shield, Calendar, Loader2, Minus, Plus, AlertTriangle } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Trophy, Users, Shield, Calendar, Loader2, Minus, Plus, AlertTriangle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { AlertDialogTrigger } from "@radix-ui/react-alert-dialog";
 
 const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
@@ -38,9 +38,17 @@ const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
+const TIMER_OPTIONS = [
+    { label: "10 min", value: 600 },
+    { label: "15 min", value: 900 },
+    { label: "20 min", value: 1200 },
+    { label: "25 min", value: 1500 },
+];
+
 export default function TournamentDashboard() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [numFields, setNumFields] = useState(1);
+  const [timerDuration, setTimerDuration] = useState(TIMER_OPTIONS[0].value);
   const [schedule, setSchedule] = useState<Schedule | null>(null);
   const [rankings, setRankings] = useState<Ranking[]>([]);
   const [playoffs, setPlayoffs] = useState<Playoff | null>(null);
@@ -244,6 +252,7 @@ export default function TournamentDashboard() {
     setSchedule(null);
     setRankings([]);
     setPlayoffs(null);
+    setTimerDuration(TIMER_OPTIONS[0].value);
     setView('setup');
   };
 
@@ -256,33 +265,31 @@ export default function TournamentDashboard() {
             Torneio de Futebol de Botão
           </h1>
         </div>
-        <div className="flex items-center gap-4">
-            {view === 'tournament' && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button variant="destructive">
-                        <AlertTriangle className="mr-2 h-4 w-4" />
-                        Novo Torneio
-                    </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Esta ação não pode ser desfeita. Isso irá apagar permanentemente
-                      todos os dados do torneio atual e reiniciar a configuração.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                    <AlertDialogAction onClick={startNewTournament}>
-                      Confirmar
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
-        </div>
+        {view === 'tournament' && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <AlertTriangle className="mr-2 h-4 w-4" />
+                Novo Torneio
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Esta ação não pode ser desfeita. Isso irá apagar permanentemente
+                  todos os dados do torneio atual e reiniciar a configuração.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={startNewTournament}>
+                  Confirmar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
       </header>
       
       {view === 'setup' ? (
@@ -291,30 +298,48 @@ export default function TournamentDashboard() {
             <CardTitle className="flex items-center gap-2 text-2xl">
               <Users /> Configuração do Torneio
             </CardTitle>
-            <CardDescription>Adicione jogadores e especifique o número de campos para começar.</CardDescription>
+            <CardDescription>Adicione jogadores, campos e defina o tempo das partidas para começar.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-8">
             <PlayerManager players={players} setPlayers={setPlayers} />
-            <div className="space-y-2">
-              <Label htmlFor="numFields" className="flex items-center gap-2 font-medium">
-                <Shield /> Número de Campos
-              </Label>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" onClick={() => setNumFields(Math.max(1, numFields - 1))}>
-                    <Minus className="h-4 w-4" />
-                </Button>
-                <Input
-                  id="numFields"
-                  type="number"
-                  value={numFields}
-                  onChange={(e) => setNumFields(Math.max(1, parseInt(e.target.value) || 1))}
-                  min="1"
-                  className="w-16 text-center text-lg"
-                />
-                <Button variant="outline" size="icon" onClick={() => setNumFields(numFields + 1)}>
-                    <Plus className="h-4 w-4" />
-                </Button>
-              </div>
+            <div className="grid md:grid-cols-2 gap-8">
+                <div className="space-y-2">
+                  <Label htmlFor="numFields" className="flex items-center gap-2 font-medium">
+                    <Shield /> Número de Campos
+                  </Label>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon" onClick={() => setNumFields(Math.max(1, numFields - 1))}>
+                        <Minus className="h-4 w-4" />
+                    </Button>
+                    <Input
+                      id="numFields"
+                      type="number"
+                      value={numFields}
+                      onChange={(e) => setNumFields(Math.max(1, parseInt(e.target.value) || 1))}
+                      min="1"
+                      className="w-16 text-center text-lg"
+                    />
+                    <Button variant="outline" size="icon" onClick={() => setNumFields(numFields + 1)}>
+                        <Plus className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                    <Label className="flex items-center gap-2 font-medium">
+                        <Clock /> Tempo de Partida
+                    </Label>
+                    <RadioGroup 
+                        defaultValue={timerDuration.toString()} 
+                        onValueChange={(value) => setTimerDuration(parseInt(value))} 
+                        className="flex flex-wrap gap-4 pt-2">
+                        {TIMER_OPTIONS.map(option => (
+                            <div key={option.value} className="flex items-center space-x-2">
+                                <RadioGroupItem value={option.value.toString()} id={`timer-${option.value}`} />
+                                <Label htmlFor={`timer-${option.value}`} className="cursor-pointer">{option.label}</Label>
+                            </div>
+                        ))}
+                    </RadioGroup>
+                </div>
             </div>
             <Button size="lg" onClick={handleGenerateSchedule} disabled={isLoading} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
               {isLoading ? (
@@ -328,7 +353,7 @@ export default function TournamentDashboard() {
         </Card>
       ) : (
         <div className="space-y-8">
-          <GameTimer />
+          <GameTimer timerDuration={timerDuration} />
 
           {schedule && (
             <Card>
@@ -357,7 +382,7 @@ export default function TournamentDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-2xl"><Trophy/> Mata-mata</CardTitle>
                 <CardDescription>Os 4 melhores jogadores avançam para o mata-mata!</CardDescription>
-              </CardHeader>
+              </Header>
               <CardContent>
                 <PlayoffBracket playoffs={playoffs} onScoreChange={handlePlayoffScoreChange} />
               </CardContent>
