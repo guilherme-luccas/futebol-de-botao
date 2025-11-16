@@ -33,6 +33,8 @@ export default function GameTimer({ timerDuration }: GameTimerProps) {
   
   useEffect(() => {
     setTime(timerDuration);
+    // When timer duration is changed during setup, we reset the timer state
+    setIsActive(false);
   }, [timerDuration]);
 
 
@@ -60,7 +62,6 @@ export default function GameTimer({ timerDuration }: GameTimerProps) {
     if (isActive) {
       return (
         <div className="flex flex-col items-center gap-2 text-accent">
-          <Bell className="h-20 w-20 animate-pulse" />
           <p className="text-lg font-semibold">Partida em andamento</p>
         </div>
       );
@@ -68,14 +69,12 @@ export default function GameTimer({ timerDuration }: GameTimerProps) {
     if (isPaused) {
       return (
         <div className="flex flex-col items-center gap-2 text-yellow-600">
-          <AlarmClockOff className="h-20 w-20" />
           <p className="text-lg font-semibold">Partida pausada</p>
         </div>
       );
     }
     return (
       <div className="flex flex-col items-center gap-2 text-muted-foreground">
-        <TimerOff className="h-20 w-20" />
         <p className="text-lg font-semibold">Nenhuma partida em andamento</p>
       </div>
     );
@@ -91,7 +90,7 @@ export default function GameTimer({ timerDuration }: GameTimerProps) {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center gap-4">
-          <div className="h-[124px] flex items-center justify-center">
+          <div className="h-6 flex items-center justify-center">
             {renderStatus()}
           </div>
           <div className="flex gap-4">
