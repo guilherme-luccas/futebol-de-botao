@@ -7,6 +7,7 @@ import PlayerManager from "@/components/player-manager";
 import ScheduleDisplay from "@/components/schedule-display";
 import RankingsTable from "@/components/rankings-table";
 import PlayoffBracket from "@/components/playoff-bracket";
+import GameTimer from "@/components/game-timer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -82,6 +83,7 @@ export default function TournamentDashboard() {
     try {
       const result = generateRoundRobinSchedule(
         players.map((p) => p.name),
+        numFields
       );
 
       const initialSchedule: Schedule = {
@@ -326,6 +328,8 @@ export default function TournamentDashboard() {
         </Card>
       ) : (
         <div className="space-y-8">
+          <GameTimer />
+
           {schedule && (
             <Card>
               <CardHeader>
