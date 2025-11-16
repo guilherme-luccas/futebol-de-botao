@@ -60,12 +60,12 @@ export default function GameTimer() {
             {isActive ? (
                 <div className="flex flex-col items-center gap-2">
                     <Bell className="h-20 w-20 animate-pulse" />
-                    <p className="text-lg">Alarme ativado...</p>
+                    <p className="text-lg">Partida em andamento</p>
                 </div>
             ) : (
                 <div className="flex flex-col items-center gap-2">
                     <TimerOff className="h-20 w-20" />
-                    <p className="text-lg">O alarme está parado.</p>
+                    <p className="text-lg">Nenhuma partida em andamento</p>
                 </div>
             )}
           </div>
