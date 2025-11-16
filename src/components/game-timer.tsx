@@ -60,7 +60,7 @@ export default function GameTimer() {
             {isActive ? (
                 <div className="flex flex-col items-center gap-2">
                     <Bell className="h-20 w-20 animate-pulse" />
-                    <p className="text-lg">O alarme tocará em {time}s...</p>
+                    <p className="text-lg">Alarme ativado... Surpresa!</p>
                 </div>
             ) : (
                 <div className="flex flex-col items-center gap-2">
