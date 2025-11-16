@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bell, Play, Pause, RefreshCw, TimerOff, AlarmClockOff } from 'lucide-react';
 
-const TIMER_SECONDS = 1200;
+const TIMER_SECONDS = 5;
 
 export default function GameTimer() {
   const [time, setTime] = useState(TIMER_SECONDS);
@@ -52,24 +52,24 @@ export default function GameTimer() {
   const renderStatus = () => {
     if (isActive) {
       return (
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-2 text-accent">
           <Bell className="h-20 w-20 animate-pulse" />
-          <p className="text-lg">Partida em andamento</p>
+          <p className="text-lg font-semibold">Partida em andamento</p>
         </div>
       );
     }
     if (isPaused) {
       return (
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-2 text-yellow-600">
           <AlarmClockOff className="h-20 w-20" />
-          <p className="text-lg">Partida pausada</p>
+          <p className="text-lg font-semibold">Partida pausada</p>
         </div>
       );
     }
     return (
-      <div className="flex flex-col items-center gap-2">
+      <div className="flex flex-col items-center gap-2 text-muted-foreground">
         <TimerOff className="h-20 w-20" />
-        <p className="text-lg">Nenhuma partida em andamento</p>
+        <p className="text-lg font-semibold">Nenhuma partida em andamento</p>
       </div>
     );
   };
@@ -84,7 +84,7 @@ export default function GameTimer() {
           </CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center gap-4">
-          <div className="text-primary h-[124px] flex items-center justify-center">
+          <div className="h-[124px] flex items-center justify-center">
             {renderStatus()}
           </div>
           <div className="flex gap-4">
