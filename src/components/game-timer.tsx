@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bell, Play, Pause, RefreshCw, TimerOff, AlarmClockOff } from 'lucide-react';
 
-const TIMER_SECONDS = 5;
+const TIMER_SECONDS = 1200;
 
 export default function GameTimer() {
   const [time, setTime] = useState(TIMER_SECONDS);
@@ -62,7 +62,7 @@ export default function GameTimer() {
       return (
         <div className="flex flex-col items-center gap-2">
           <AlarmClockOff className="h-20 w-20" />
-          <p className="text-lg">Alarme pausado</p>
+          <p className="text-lg">Partida pausada</p>
         </div>
       );
     }
