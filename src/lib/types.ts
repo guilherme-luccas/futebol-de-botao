@@ -44,6 +44,7 @@ export interface PlayoffMatch {
   player2Score: number | null;
   winner: string | null;
   nextMatchId: string | null;
+  field: number;
 }
 
 export interface Playoff {

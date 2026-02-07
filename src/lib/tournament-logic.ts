@@ -92,6 +92,7 @@ export function generatePlayoffs(top4Rankings: Ranking[]): Playoff | null {
             player2Score: null,
             winner: null,
             nextMatchId: 'f1',
+            field: 0,
         },
         {
             id: 'sf2',
@@ -102,6 +103,7 @@ export function generatePlayoffs(top4Rankings: Ranking[]): Playoff | null {
             player2Score: null,
             winner: null,
             nextMatchId: 'f1',
+            field: 0,
         },
     ];
 
@@ -114,6 +116,7 @@ export function generatePlayoffs(top4Rankings: Ranking[]): Playoff | null {
         player2Score: null,
         winner: null,
         nextMatchId: null,
+        field: 0,
     };
     
     return { semiFinals, final };

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Bell, Play, Pause, RefreshCw, TimerOff, AlarmClockOff } from 'lucide-react';
+import { useSounds } from '@/hooks/use-sounds';
 
 interface GameTimerProps {
     timerDuration: number;
@@ -12,16 +13,21 @@ interface GameTimerProps {
 export default function GameTimer({ timerDuration }: GameTimerProps) {
   const [time, setTime] = useState(timerDuration);
   const [isActive, setIsActive] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const { playTimerStart, playTimerEnd } = useSounds();
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
     if (isActive && time > 0) {
       interval = setInterval(() => {
-        setTime((prevTime) => prevTime - 1);
+        setTime((prevTime) => {
+          const newTime = prevTime - 1;
+          console.log('Timer funcionando - Tempo restante:', newTime);
+          return newTime;
+        });
       }, 1000);
     } else if (isActive && time === 0) {
-      audioRef.current?.play();
+      console.log('Timer finalizado! Tocando alarme.');
+      playTimerEnd();
       setIsActive(false);
     }
     return () => {
@@ -29,7 +35,7 @@ export default function GameTimer({ timerDuration }: GameTimerProps) {
         clearInterval(interval);
       }
     };
-  }, [isActive, time]);
+  }, [isActive, time, playTimerEnd]);
   
   useEffect(() => {
     setTime(timerDuration);
@@ -41,8 +47,12 @@ export default function GameTimer({ timerDuration }: GameTimerProps) {
   const toggleTimer = () => {
     if (time === 0) {
         resetTimer();
+        playTimerStart();
         setIsActive(true);
     } else {
+        if (!isActive) {
+          playTimerStart();
+        }
         setIsActive(!isActive);
     }
   };
@@ -50,10 +60,6 @@ export default function GameTimer({ timerDuration }: GameTimerProps) {
   const resetTimer = () => {
     setIsActive(false);
     setTime(timerDuration);
-    audioRef.current?.pause();
-    if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-    }
   };
 
   const isPaused = !isActive && time > 0 && time < timerDuration;
@@ -108,7 +114,6 @@ export default function GameTimer({ timerDuration }: GameTimerProps) {
           </div>
         </CardContent>
       </Card>
-      <audio ref={audioRef} src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto" />
     </>
   );
 }

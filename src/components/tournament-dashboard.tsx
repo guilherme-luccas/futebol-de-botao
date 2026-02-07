@@ -63,11 +63,26 @@ export default function TournamentDashboard() {
       if (areAllMatchesPlayed(schedule)) {
         const top4Rankings = newRankings.slice(0, 4);
         if (top4Rankings.length >= 4) {
-          setPlayoffs(generatePlayoffs(top4Rankings));
+          const generatedPlayoffs = generatePlayoffs(top4Rankings);
+          
+          // Sortear campos automaticamente para todos os jogos do playoff
+          if (generatedPlayoffs && numFields > 0) {
+            const availableFields = Array.from({ length: numFields }, (_, i) => i + 1);
+            
+            // Sortear campo para cada semifinal
+            generatedPlayoffs.semiFinals.forEach(match => {
+              match.field = availableFields[Math.floor(Math.random() * availableFields.length)];
+            });
+            
+            // Sortear campo para a final
+            generatedPlayoffs.final.field = availableFields[Math.floor(Math.random() * availableFields.length)];
+          }
+          
+          setPlayoffs(generatedPlayoffs);
         }
       }
     }
-  }, [schedule, players]);
+  }, [schedule, players, numFields]);
 
   const handleGenerateSchedule = async () => {
     if (players.length < 3) {
@@ -174,6 +189,31 @@ export default function TournamentDashboard() {
         title: "Campos Sorteados!",
         description: `Os campos para a rodada ${round.round} foram definidos.`,
     })
+  };
+
+  const handleDrawPlayoffField = (matchId: string) => {
+    if (!playoffs || numFields <= 1) return;
+
+    const newPlayoffs = JSON.parse(JSON.stringify(playoffs)) as Playoff;
+    const availableFields = Array.from({ length: numFields }, (_, i) => i + 1);
+    const randomField = availableFields[Math.floor(Math.random() * availableFields.length)];
+
+    for (const match of newPlayoffs.semiFinals) {
+      if (match.id === matchId) {
+        match.field = randomField;
+        break;
+      }
+    }
+
+    if (newPlayoffs.final.id === matchId) {
+      newPlayoffs.final.field = randomField;
+    }
+
+    setPlayoffs(newPlayoffs);
+    toast({
+      title: "Campo Sorteado!",
+      description: `O campo ${randomField} foi definido para a partida.`,
+    });
   };
   
   const handlePlayoffScoreChange = (matchId: string, player: 'player1' | 'player2', score: number | null) => {
@@ -384,7 +424,7 @@ export default function TournamentDashboard() {
                 <CardDescription>Os 4 melhores jogadores avançam para o mata-mata!</CardDescription>
               </CardHeader>
               <CardContent>
-                <PlayoffBracket playoffs={playoffs} onScoreChange={handlePlayoffScoreChange} />
+                <PlayoffBracket playoffs={playoffs} onScoreChange={handlePlayoffScoreChange} onDrawField={handleDrawPlayoffField} numFields={numFields} />
               </CardContent>
             </Card>
           )}
