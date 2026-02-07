@@ -14,8 +14,9 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Trophy, Users, Shield, Calendar, Loader2, Minus, Plus, AlertTriangle, Clock } from "lucide-react";
+import { Trophy, Users, Shield, Calendar, Loader2, Minus, Plus, AlertTriangle, Clock, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAutoSave } from "@/hooks/use-auto-save";
 
 const FootballIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg
@@ -54,7 +55,58 @@ export default function TournamentDashboard() {
   const [playoffs, setPlayoffs] = useState<Playoff | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [view, setView] = useState<'setup' | 'tournament'>('setup');
+  const [isInitialized, setIsInitialized] = useState(false);
   const { toast } = useToast();
+  const { saveState, loadState, clearState, startAutoSave } = useAutoSave();
+
+  // Carregar estado salvo ao montar o componente
+  useEffect(() => {
+    const savedState = loadState();
+    if (savedState) {
+      setPlayers(savedState.players || []);
+      setNumFields(savedState.numFields || 1);
+      setTimerDuration(savedState.timerDuration || TIMER_OPTIONS[0].value);
+      setSchedule(savedState.schedule || null);
+      setRankings(savedState.rankings || []);
+      setPlayoffs(savedState.playoffs || null);
+      setView(savedState.view || 'setup');
+    }
+    setIsInitialized(true);
+  }, []);
+
+  // Iniciar auto-save após o componente estar inicializado
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const getCurrentState = () => ({
+      players,
+      numFields,
+      timerDuration,
+      schedule,
+      rankings,
+      playoffs,
+      view,
+    });
+
+    startAutoSave(getCurrentState);
+  }, [isInitialized, startAutoSave]);
+
+  // Salvar estado após mudanças importantes
+  useEffect(() => {
+    if (!isInitialized) return;
+    
+    const currentState = {
+      players,
+      numFields,
+      timerDuration,
+      schedule,
+      rankings,
+      playoffs,
+      view,
+    };
+
+    saveState(currentState, false);
+  }, [players, numFields, timerDuration, schedule, rankings, playoffs, view, isInitialized]);
 
   useEffect(() => {
     if (schedule) {
@@ -287,6 +339,7 @@ export default function TournamentDashboard() {
 
 
   const startNewTournament = () => {
+    clearState();
     setPlayers([]);
     setNumFields(1);
     setSchedule(null);
@@ -294,6 +347,19 @@ export default function TournamentDashboard() {
     setPlayoffs(null);
     setTimerDuration(TIMER_OPTIONS[0].value);
     setView('setup');
+  };
+
+  const handleManualSave = () => {
+    const currentState = {
+      players,
+      numFields,
+      timerDuration,
+      schedule,
+      rankings,
+      playoffs,
+      view,
+    };
+    saveState(currentState, true);
   };
 
   return (
@@ -306,7 +372,12 @@ export default function TournamentDashboard() {
           </h1>
         </div>
         {view === 'tournament' && (
-          <AlertDialog>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleManualSave}>
+              <Save className="mr-2 h-4 w-4" />
+              Salvar
+            </Button>
+            <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive">
                 <AlertTriangle className="mr-2 h-4 w-4" />
@@ -329,6 +400,7 @@ export default function TournamentDashboard() {
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
+          </div>
         )}
       </header>
       
